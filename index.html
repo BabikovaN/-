@@ -7,6 +7,8 @@
 <style>
 body {
   font-family: Arial;
+  font-size:20px;
+  line-height:1.6;
   margin:0;
   background:#eef2f7;
 }
@@ -52,14 +54,33 @@ textarea {
 }
 
 button {
-  padding:10px;
+  font-size:20px;
+  padding:14px;
+  border-radius:12px;
   margin-top:10px;
   cursor:pointer;
 }
 
+h2, h3 {
+  text-align:center;
+}
+
+#instruction {
+  font-size:22px;
+  font-weight:bold;
+}
+
+#msg {
+  font-size:22px;
+  text-align:center;
+}
+
 #preview {
+  font-size:18px;
+  background:#fff;
+  border-radius:10px;
+  padding:15px;
   border:1px solid #ccc;
-  padding:10px;
   min-height:150px;
 }
 
@@ -86,7 +107,8 @@ button {
 
 #hintBox {
   display:none;
-  background:#333;
+  background:#dff6ff;
+  color:#000;
   padding:10px;
   border-radius:8px;
   margin-top:10px;
@@ -101,7 +123,8 @@ button {
   50% { transform:scale(1.1); }
   100% { transform:scale(1); }
 }
-  @media (max-width: 768px) {
+
+@media (max-width: 768px) {
   .container {
     flex-direction: column;
   }
@@ -125,7 +148,7 @@ button {
     gap:5px;
     text-align:center;
   }
-}
+
 </style>
 </head>
 
