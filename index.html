@@ -166,45 +166,65 @@ body {
 
 <script>
 
+<script>
+
 // ===== STATE =====
 let user = JSON.parse(localStorage.getItem("user")) || {
- xp:0,
- streak:0,
- currentLevel:0
+  xp: 0,
+  streak: 0,
+  currentLevel: 0
 };
 
 // ===== PARSER =====
 function parseHTML(code){
- let parser = new DOMParser();
- return parser.parseFromString(code,"text/html").body;
+  let parser = new DOMParser();
+  return parser.parseFromString(code, "text/html").body;
 }
 
-// ===== HISTORY CODE VIEW =====
+// ===== CODE VIEW =====
 function updateCodeView(){
- let allCode = "";
+  let allCode = "";
 
- for(let i = 0; i <= user.currentLevel; i++){
-  let saved = localStorage.getItem("code_"+i);
-  if(saved){
-   allCode += `--- Рівень ${i+1} ---\n${saved}\n\n`;
+  for(let i = 0; i <= user.currentLevel; i++){
+    let saved = localStorage.getItem("code_" + i);
+    if(saved){
+      allCode += `--- Рівень ${i+1} ---\n${saved}\n\n`;
+    }
   }
- }
 
- let current = document.getElementById("code").value;
+  let current = document.getElementById("code").value;
+  allCode += "--- Поточний ---\n" + current;
 
- allCode += "--- Поточний ---\n" + current;
-
- document.getElementById("codeView").innerText = allCode;
+  document.getElementById("codeView").innerText = allCode;
 }
 
-// ===== FULL HISTORY =====
+// ===== REAL SITE (iframe) =====
 function updateFullHistory(){
- let code = document.getElementById("code").value;
-
- let iframe = document.getElementById("fullHistory");
- iframe.srcdoc = code;
+  let code = document.getElementById("code").value;
+  document.getElementById("fullHistory").srcdoc = code;
 }
 
+// ===== PREVIEW =====
+function updatePreview(){
+  let code = document.getElementById("code").value;
+
+  // Лівий preview
+  document.getElementById("preview").innerHTML = code;
+
+  // "Мій сайт"
+  updateFullHistory();
+
+  // Код
+  updateCodeView();
+}
+
+// ===== EVENTS =====
+document.getElementById("code").addEventListener("input", updatePreview);
+
+// ===== INIT =====
+updatePreview();
+
+</script>
 // ===== TASKS (12 рівнів) =====
 const tasks = [
 {
