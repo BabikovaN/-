@@ -61,13 +61,19 @@ button{
 .level-btn.open{background:#55efc4;}
 
 .info-box{
-  background:#f1f2f6;
-  padding:12px;
-  margin-top:10px;
-  border-radius:10px;
+  background:#ffffff;
+  padding:14px;
+  margin-top:12px;
+  border-radius:12px;
   text-align:left;
-  line-height:1.5;
+  line-height:1.6;
+  box-shadow:0 2px 6px rgba(0,0,0,0.1);
 }
+
+.instruction{border-left:5px solid #0984e3;}
+.hint{border-left:5px solid #fdcb6e;}
+.explanation{border-left:5px solid #6c5ce7;}
+.example{border-left:5px solid #00b894;}
 
 pre{
   background:#2d3436;
@@ -95,10 +101,10 @@ pre{
 
   <h2 id="lessonTitle"></h2>
 
-  <div id="instruction" class="info-box"></div>
-  <div id="hint" class="info-box"></div>
-  <div id="explanation" class="info-box"></div>
-  <div id="example" class="info-box"></div>
+<div id="instruction" class="info-box instruction"></div>
+<div id="hint" class="info-box hint"></div>
+<div id="explanation" class="info-box explanation"></div>
+<div id="example" class="info-box example"></div>
 
   <textarea id="code"></textarea>
 
@@ -244,6 +250,8 @@ function showTab(tab){
 
 function loadLevel(i){
 
+function loadLevel(i){
+
   if(i > user.unlocked){
     alert("🔒 Заблоковано");
     return;
@@ -255,10 +263,18 @@ function loadLevel(i){
   let t = tasks[i];
 
   document.getElementById("lessonTitle").innerText = t.t;
-  document.getElementById("instruction").innerHTML = "📌 Завдання:<br>" + t.instruction;
-  document.getElementById("hint").innerHTML = "💡 Підказка:<br>" + t.hint;
-  document.getElementById("explanation").innerHTML = "🧠 Пояснення:<br>" + t.exp;
-  document.getElementById("example").innerHTML = "🧾 Приклад:<pre>" + escapeHTML(t.example) + "</pre>";
+
+  document.getElementById("instruction").innerHTML =
+    "<b>📌 Завдання:</b><br>" + t.instruction;
+
+  document.getElementById("hint").innerHTML =
+    "<b>💡 Підказка:</b><br>" + t.hint;
+
+  document.getElementById("explanation").innerHTML =
+    "<b>🧠 Пояснення:</b><br>" + t.exp;
+
+  document.getElementById("example").innerHTML =
+    "<b>🧾 Приклад:</b><pre>" + escapeHTML(t.example) + "</pre>";
 
   document.getElementById("code").value="";
 }
