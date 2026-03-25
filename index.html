@@ -6,20 +6,20 @@
 
 <style>
 body { font-family: sans-serif; text-align: center; margin: 20px; }
-button { padding: 10px 20px; margin: 10px; font-size: 18px; }
 #gameArea { margin-top: 20px; }
-#output { margin-top: 20px; border: 2px solid #4da3ff; padding: 10px; min-height: 150px; }
+#output { margin-top: 20px; border: 1px solid #ccc; padding: 10px; min-height: 150px; }
 input, textarea { font-size: 16px; padding: 5px; margin: 5px; }
 img { max-width: 200px; margin: 10px; }
-.example { background:#f0f0f0; padding:10px; margin:10px; border-radius:10px;}
-.hint { color:#555; margin:10px; }
+#movingBox { width:50px; height:50px; background:red; position:relative; margin:10px auto;}
+.hint { background:#fff3cd; padding:10px; margin:10px; border-radius:10px; }
+.example { background:#e7f3ff; padding:10px; margin:10px; border-radius:10px; font-family: monospace;}
 </style>
 
 </head>
 <body>
 
 <h1>🎮 Гра: Малий веб-розробник</h1>
-<p>Навчися створювати свій сайт крок за кроком!</p>
+<p>Створи свій сайт про улюблену тварину 🐱</p>
 
 <div id="gameArea"></div>
 <div id="output"></div>
@@ -38,92 +38,106 @@ function loadLevel() {
 
     case 1:
       gameArea.innerHTML = `
-        <h2>🔴 Рівень 1</h2>
-        <p class="hint">👉 Зроби кнопку ЧЕРВОНОЮ</p>
-
-        <div class="example">
-        Приклад CSS:<br>
-        background-color: red;
-        </div>
-
+        <h2>Рівень 1: Зроби кнопку червоною 🔴</h2>
+        <div class="hint">👉 Натисни правильний колір</div>
         <button onclick="setColor('red')">🔴 Червоний</button>
         <button onclick="setColor('blue')">🔵 Синій</button>
-
+        <button onclick="setColor('green')">🟢 Зелений</button>
         <br><button id="gameBtn">Кнопка</button>
       `;
       break;
 
     case 2:
       gameArea.innerHTML = `
-        <h2>📝 Рівень 2</h2>
-        <p class="hint">👉 Створи заголовок (наприклад: Мій кіт)</p>
+        <h2>Рівень 2: Заголовок</h2>
+
+        <div class="hint">
+        🧠 Заголовок — це як назва книжки
+        </div>
 
         <div class="example">
-        HTML приклад:<br>
         &lt;h1&gt;Мій кіт&lt;/h1&gt;
         </div>
 
-        <input type="text" id="titleInput" placeholder="Напиши щось">
+        <input type="text" id="titleInput" placeholder="Наприклад: Мій кіт">
+        <br>
         <button onclick="setTitle()">Створити</button>
       `;
       break;
 
     case 3:
       gameArea.innerHTML = `
-        <h2>📄 Рівень 3</h2>
-        <p class="hint">👉 Напиши опис тварини</p>
+        <h2>Рівень 3: Опис</h2>
 
-        <div class="example">
-        &lt;p&gt;Мій кіт любить гратися&lt;/p&gt;
+        <div class="hint">
+        🧠 Тег &lt;p&gt; — це текст (як речення)
         </div>
 
-        <textarea id="textInput" placeholder="Напиши опис"></textarea><br>
+        <div class="example">
+        &lt;p&gt;Мій кіт любить молоко&lt;/p&gt;
+        </div>
+
+        <textarea id="textInput" placeholder="Напиши щось про кота"></textarea><br>
         <button onclick="setParagraph()">Додати</button>
       `;
       break;
 
     case 4:
       gameArea.innerHTML = `
-        <h2>🖼 Рівень 4</h2>
-        <p class="hint">👉 Додай картинку</p>
+        <h2>Рівень 4: Картинка</h2>
 
-        <div class="example">
-        &lt;img src="посилання"&gt;
+        <div class="hint">
+        🧠 &lt;img&gt; показує картинку
         </div>
 
-        <input type="text" id="imgInput" placeholder="Встав URL картинки">
+        <div class="example">
+        &lt;img src="https://placekitten.com/200/200"&gt;
+        </div>
+
+        <input type="text" id="imgInput" placeholder="Встав посилання">
         <button onclick="setImage()">Додати</button>
       `;
       break;
 
     case 5:
       gameArea.innerHTML = `
-        <h2>📋 Рівень 5</h2>
-        <p class="hint">👉 Список через кому</p>
+        <h2>Рівень 5: Список</h2>
 
-        <div class="example">
-        м'яч, мишка, клубок
+        <div class="hint">
+        🧠 Список — це перелік
         </div>
 
-        <input type="text" id="listInput" placeholder="через кому">
+        <div class="example">
+        &lt;ul&gt;
+        &lt;li&gt;М'яч&lt;/li&gt;
+        &lt;/ul&gt;
+        </div>
+
+        <input type="text" id="listInput" placeholder="м'яч, рибка, іграшка">
         <button onclick="setList()">Додати</button>
       `;
       break;
 
     case 6:
       gameArea.innerHTML = `
-        <h2>🎨 Рівень 6</h2>
-        <p class="hint">👉 Натисни кнопку щоб змінити колір</p>
+        <h2>Рівень 6: Зміна кольору</h2>
+
+        <div class="hint">
+        🧠 Кнопка може змінювати стиль
+        </div>
 
         <p id="text">Мій кіт</p>
-        <button onclick="changeTextColor()">Змінити</button>
+        <button onclick="changeTextColor()">Змінити колір</button>
       `;
       break;
 
     case 7:
       gameArea.innerHTML = `
-        <h2>🔄 Рівень 7</h2>
-        <p class="hint">👉 Натисни кнопку</p>
+        <h2>Рівень 7: Зміна тексту</h2>
+
+        <div class="hint">
+        🧠 innerText змінює текст
+        </div>
 
         <p id="text2">Привіт</p>
         <button onclick="changeTextContent()">Натисни</button>
@@ -132,8 +146,11 @@ function loadLevel() {
 
     case 8:
       gameArea.innerHTML = `
-        <h2>➕ Рівень 8</h2>
-        <p class="hint">👉 Додай новий абзац</p>
+        <h2>Рівень 8: Новий текст</h2>
+
+        <div class="hint">
+        🧠 Ми можемо створювати нові елементи
+        </div>
 
         <button onclick="addParagraph()">Додати</button>
       `;
@@ -141,8 +158,11 @@ function loadLevel() {
 
     case 9:
       gameArea.innerHTML = `
-        <h2>🌈 Рівень 9</h2>
-        <p class="hint">👉 Натисни на котика</p>
+        <h2>Рівень 9: Фон</h2>
+
+        <div class="hint">
+        🧠 Натисни на картинку
+        </div>
 
         <img src="https://placekitten.com/200/200" onclick="changeBg()">
       `;
@@ -150,32 +170,35 @@ function loadLevel() {
 
     case 10:
       gameArea.innerHTML = `
-        <h2>🏃 Рівень 10</h2>
-        <p class="hint">👉 Запусти рух</p>
+        <h2>Рівень 10: Рух</h2>
 
-        <div id="movingBox" style="width:50px;height:50px;background:red;position:relative;"></div>
+        <div class="hint">
+        🧠 Елемент може рухатись
+        </div>
+
+        <div id="movingBox"></div>
         <button onclick="moveBox()">Рухати</button>
       `;
       break;
 
     case 11:
       gameArea.innerHTML = `
-        <h2>🎉 ФІНАЛ</h2>
-        <p class="hint">👉 Створи свій сайт!</p>
+        <h2>Фінал 🎉</h2>
 
-        <div class="example">
-        &lt;h1&gt;Мій кіт&lt;/h1&gt;<br>
-        &lt;p&gt;Опис&lt;/p&gt;
+        <div class="hint">
+        Створи свій сайт сам!
         </div>
 
-        <textarea id="finalSite" rows="10" cols="50"></textarea><br>
+        <textarea id="finalSite" rows="10" cols="50"
+        placeholder="<h1>Мій кіт</h1>"></textarea><br>
+
         <button onclick="showFinalSite()">Показати</button>
       `;
       break;
   }
 }
 
-// функції
+// логіка (та сама)
 function setColor(color){
   let btn=document.getElementById("gameBtn");
   btn.style.backgroundColor=color;
@@ -199,14 +222,12 @@ function setImage(){
 
 function setList(){
   let val=document.getElementById("listInput").value;
-  if(val.trim()!==""){
-    let items=val.split(",");
-    let html="<ul>";
-    items.forEach(i=> html+="<li>"+i+"</li>");
-    html+="</ul>";
-    output.innerHTML=html;
-    next();
-  }
+  let items=val.split(",");
+  let html="<ul>";
+  items.forEach(i=> html+="<li>"+i+"</li>");
+  html+="</ul>";
+  output.innerHTML=html;
+  next();
 }
 
 function changeTextColor(){
@@ -214,12 +235,12 @@ function changeTextColor(){
 }
 
 function changeTextContent(){
-  document.getElementById('text2').innerText="🎉 Молодець!";
+  document.getElementById('text2').innerText="🎉";
   next();
 }
 
 function addParagraph(){
-  output.innerHTML += "<p>Новий абзац</p>";
+  output.innerHTML += "<p>Новий текст</p>";
   next();
 }
 
