@@ -5,41 +5,6 @@
 <title>Pet HTML Trainer 🐾</title>
 
 <style>
-// ===== LEVEL =====
-function loadLevel(i){
- user.currentLevel = i;
- localStorage.setItem("user", JSON.stringify(user));
-
- let t = tasks[i];
- document.getElementById("levelTitle").innerText = t.t;
- document.getElementById("instruction").innerText = t.instruction;
- document.getElementById("hint").innerText = t.hint;
- document.getElementById("example").innerText = t.example;
-
- document.getElementById("code").value = localStorage.getItem("code_"+i) || "";
-
- updatePreview();
- updateUI();
- updateFullHistory();
-}
-
-// ===== PREVIEW =====
-function updatePreview(){
- let code = document.getElementById("code").value;
- document.getElementById("preview").innerHTML = code;
-
- // 🔽 зберігаємо історію
- let history = JSON.parse(localStorage.getItem("fullHistory")) || [];
- history.push({
-  level: user.currentLevel,
-  code: code
- });
- localStorage.setItem("fullHistory", JSON.stringify(history));
-
- updateCodeView();
- updateFullHistory();
-}
-
 // ===== CHECK =====
 function check(){
  let code = document.getElementById("code").value;
@@ -105,12 +70,6 @@ function restartGame(){
  updateUI();
  updateFullHistory();
 }
-
-// ===== EVENTS =====
-document.getElementById("code").addEventListener("input", updatePreview);
-
-// ===== INIT =====
-loadLevel(user.currentLevel || 0);
 </style>
 </head>
 
