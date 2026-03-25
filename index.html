@@ -35,6 +35,7 @@ textarea{
   padding:10px;
   margin:10px 0;
   font-size:16px;
+  font-family: monospace;
 }
 
 button{
@@ -51,11 +52,20 @@ button{
 .success{color:green;font-weight:bold;}
 
 .example{
-  background:#dfe6e9;
-  padding:10px;
+  background:#2d3436;
+  color:#00ffcc;
+  padding:12px;
   border-radius:10px;
-  font-family:monospace;
+  font-family: monospace;
+  text-align:left;
+  overflow-x:auto;
 }
+
+.task-title{
+  font-size:20px;
+  font-weight:bold;
+}
+
 </style>
 </head>
 
@@ -65,6 +75,7 @@ button{
 
 <div class="container">
   <div class="card">
+    
     <div id="task"></div>
 
     <textarea id="code" placeholder="Впиши свій код тут..."></textarea>
@@ -84,16 +95,16 @@ let level = 0;
 
 const tasks = [
 {
-  text: "Зроби заголовок",
+  text: "Створи заголовок",
   example: "<h1>Мій кіт</h1>",
   validate: (code) => {
     if(!code.includes("<h1>")) return "❌ Немає <h1>";
-    if(!code.includes("</h1>")) return "❌ Немає закриваючого </h1>";
+    if(!code.includes("</h1>")) return "❌ Немає </h1>";
     return "ok";
   }
 },
 {
-  text: "Зроби абзац",
+  text: "Створи абзац",
   example: "<p>Привіт</p>",
   validate: (code) => {
     if(!code.includes("<p>")) return "❌ Немає <p>";
@@ -109,37 +120,39 @@ const tasks = [
     if(!code.includes("src=")) return "❌ Немає src";
     return "ok";
   }
-},
-{
-  text: "Зроби список",
-  example: "<ul><li>Кіт</li><li>Пес</li></ul>",
-  validate: (code) => {
-    if(!code.includes("<ul>")) return "❌ Немає <ul>";
-    if(!code.includes("</ul>")) return "❌ Немає </ul>";
-    if(!code.includes("<li>")) return "❌ Немає <li>";
-    return "ok";
-  }
 }
 ];
 
 function loadTask(){
   if(level >= tasks.length){
     document.getElementById("task").innerHTML = "🎉 Всі рівні пройдено!";
+    localStorage.removeItem("savedCode");
     return;
   }
 
   let t = tasks[level];
 
   document.getElementById("task").innerHTML = `
-    <h2>${t.text}</h2>
-    <p>Приклад:</p>
-    <div class="example">${t.example}</div>
+    <div class="task-title">${t.text}</div>
+
+    <p>📌 Приклад правильного коду:</p>
+    <div class="example">
+<pre>${escapeHtml(t.example)}</pre>
+    </div>
   `;
 
-  document.getElementById("code").value = "";
+  // 🔥 відновлення збереженого коду
+  let saved = localStorage.getItem("savedCode");
+  document.getElementById("code").value = saved ? saved : "";
+
   document.getElementById("msg").innerHTML = "";
   document.getElementById("preview").innerHTML = "";
 }
+
+// 🔥 збереження при вводі
+document.getElementById("code").addEventListener("input", function(){
+  localStorage.setItem("savedCode", this.value);
+});
 
 function check(){
   let code = document.getElementById("code").value.trim();
@@ -166,6 +179,8 @@ function check(){
   document.getElementById("preview").innerHTML = code;
 
   level++;
+  localStorage.removeItem("savedCode");
+
   setTimeout(loadTask, 1500);
 }
 
@@ -177,6 +192,7 @@ function showSuccess(msg){
   document.getElementById("msg").innerHTML = `<span class="success">${msg}</span>`;
 }
 
+// перевірка HTML
 function isValidHTML(code){
   let stack = [];
   let tags = code.match(/<\/??[^>]+>/g);
@@ -196,6 +212,14 @@ function isValidHTML(code){
   }
 
   return stack.length === 0;
+}
+
+// escape HTML для прикладу
+function escapeHtml(text){
+  return text
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;");
 }
 
 loadTask();
