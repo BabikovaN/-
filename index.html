@@ -45,15 +45,18 @@ button{
 .hidden{display:none;}
 
 .info-box{
-  background:#f1f2f6;
+  background:#ffffff;
   padding:12px;
   margin-top:10px;
   border-radius:10px;
   text-align:left;
+  line-height:1.5;
+  color:#000;
+  border:1px solid #ddd;
 }
 
 #example{
-  background:#fff;
+  background:#f1f2f6;
   border-left:6px solid #00cec9;
   font-family: monospace;
 }
@@ -105,10 +108,22 @@ button{
 
   <h2 id="lessonTitle"></h2>
 
-  <div id="instruction" class="info-box"></div>
-  <div id="hint" class="info-box"></div>
+  <div class="info-box">
+    <b>📌 Завдання:</b>
+    <div id="instruction"></div>
+  </div>
+
+  <div class="info-box">
+    <b>💡 Підказка:</b>
+    <div id="hint"></div>
+  </div>
+
   <div id="explanation" class="info-box"></div>
-  <div id="example" class="info-box"></div>
+
+  <div class="info-box">
+    <b>🧪 Приклад:</b>
+    <pre id="example"></pre>
+  </div>
 
   <textarea id="code"></textarea>
 
@@ -158,17 +173,17 @@ function escapeHTML(str){
 const tasks = [
 {
 t:"Заголовок",
-instruction:"Напиши HTML код заголовка сторінки",
+instruction:"Напиши HTML заголовок сторінки",
 hint:"Використай <h1>",
-exp:"Приклад: <h1>Мій сайт</h1>",
+exp:"<h1> створює головний заголовок",
 example:"<h1>Мій сайт</h1>",
 v:(c)=>c.includes("<h1>")
 },
 {
 t:"Абзац",
-instruction:"Створи абзац тексту",
+instruction:"Створи абзац",
 hint:"<p>",
-exp:"Приклад: <p>Привіт</p>",
+exp:"Абзац тексту",
 example:"<p>Привіт</p>",
 v:(c)=>c.includes("<p>")
 },
@@ -176,15 +191,15 @@ v:(c)=>c.includes("<p>")
 t:"Жирний текст",
 instruction:"Зроби текст жирним",
 hint:"<b>",
-exp:"Приклад: <b>Текст</b>",
+exp:"Bold текст",
 example:"<b>Текст</b>",
 v:(c)=>c.includes("<b>")
 },
 {
 t:"Курсив",
-instruction:"Курсив текст",
+instruction:"Курсив",
 hint:"<i>",
-exp:"Приклад: <i>Текст</i>",
+exp:"Italic текст",
 example:"<i>Текст</i>",
 v:(c)=>c.includes("<i>")
 },
@@ -192,15 +207,15 @@ v:(c)=>c.includes("<i>")
 t:"Посилання",
 instruction:"Створи посилання",
 hint:"<a>",
-exp:"Приклад: <a href='#'>Сайт</a>",
+exp:"Link",
 example:'<a href="#">Сайт</a>',
 v:(c)=>c.includes("<a")
 },
 {
 t:"Зображення",
-instruction:"Додай зображення",
+instruction:"Додай картинку",
 hint:"<img>",
-exp:"Приклад: <img src='img.jpg'>",
+exp:"Image",
 example:'<img src="img.jpg">',
 v:(c)=>c.includes("<img")
 },
@@ -208,7 +223,7 @@ v:(c)=>c.includes("<img")
 t:"Список",
 instruction:"Створи список",
 hint:"<ul>",
-exp:"Приклад: <ul><li>1</li></ul>",
+exp:"List",
 example:"<ul><li>1</li></ul>",
 v:(c)=>c.includes("<ul")
 },
@@ -216,31 +231,31 @@ v:(c)=>c.includes("<ul")
 t:"Нумерований список",
 instruction:"Нумерований список",
 hint:"<ol>",
-exp:"Приклад: <ol><li>1</li></ol>",
+exp:"Ordered list",
 example:"<ol><li>1</li></ol>",
 v:(c)=>c.includes("<ol")
 },
 {
 t:"Контейнер",
-instruction:"Створи блок",
+instruction:"Блок",
 hint:"<div>",
-exp:"Приклад: <div>Текст</div>",
+exp:"Container",
 example:"<div>Текст</div>",
 v:(c)=>c.includes("<div")
 },
 {
 t:"Кнопка",
-instruction:"Створи кнопку",
+instruction:"Кнопка",
 hint:"<button>",
-exp:"Приклад: <button>OK</button>",
+exp:"Button",
 example:"<button>OK</button>",
 v:(c)=>c.includes("<button")
 },
 {
 t:"Форма",
-instruction:"Створи форму",
+instruction:"Форма",
 hint:"<form>",
-exp:"Приклад: <form></form>",
+exp:"Form",
 example:"<form></form>",
 v:(c)=>c.includes("<form")
 }
@@ -259,10 +274,10 @@ function loadLevel(i){
   let t = tasks[i];
 
   document.getElementById("lessonTitle").innerText = t.t;
-  document.getElementById("instruction").innerHTML = t.instruction;
-  document.getElementById("hint").innerHTML = t.hint;
-  document.getElementById("explanation").innerHTML = t.exp;
-  document.getElementById("example").innerHTML = "<pre>"+escapeHTML(t.example)+"</pre>";
+  document.getElementById("instruction").innerText = t.instruction;
+  document.getElementById("hint").innerText = t.hint;
+  document.getElementById("explanation").innerText = t.exp;
+  document.getElementById("example").textContent = t.example;
 
   document.getElementById("code").value = savedCode[i] || "";
 
@@ -303,7 +318,7 @@ function check(){
   updateUI();
 
   if(currentLevel < tasks.length - 1){
-    loadLevel(currentLevel + 1);
+    setTimeout(()=>loadLevel(currentLevel + 1), 800);
   }
 }
 
