@@ -152,9 +152,10 @@ body {
   </div>
 
   <!-- ✅ НОВИЙ БЛОК ТУТ -->
-  <div class="panel right">
-    <h3>📜 Повна історія</h3>
-    <pre id="fullHistory"></pre>
+ <div class="panel right">
+  <h3>📜 Мій сайт</h3>
+  <iframe id="fullHistory" style="width:100%; height:100%; border:none;"></iframe>
+
 
     <button onclick="restartGame()">🔄 Почати заново</button>
   </div>
@@ -198,14 +199,10 @@ function updateCodeView(){
 
 // ===== FULL HISTORY =====
 function updateFullHistory(){
- let history = JSON.parse(localStorage.getItem("fullHistory")) || [];
+ let code = document.getElementById("code").value;
 
- let text = "";
- history.forEach((item, i)=>{
-  text += `--- Рівень ${item.level + 1} ---\n${item.code}\n\n`;
- });
-
- document.getElementById("fullHistory").innerText = text;
+ let iframe = document.getElementById("fullHistory");
+ iframe.srcdoc = code;
 }
 
 // ===== TASKS (12 рівнів) =====
