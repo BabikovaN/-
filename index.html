@@ -148,6 +148,7 @@ h2, h3 {
     gap:5px;
     text-align:center;
   }
+    }
 
 </style>
 </head>
@@ -261,11 +262,12 @@ const tasks = [
  }
 },
 
+
 {
  t:"🐱 Рівень 5",
  instruction:"Додай посилання 🔗",
  hint:"Використай <a href>",
- example:'<a href="#">Тут</a>',
+ example:'<a href="https://example.com">Посилання</a>',
  check:(doc)=>{
   let el = doc.querySelector("a");
   return {ok: el && el.hasAttribute("href"), errors: !el?["❌ Додай <a>"]:[]}
@@ -276,17 +278,20 @@ const tasks = [
  t:"🐶 Рівень 6",
  instruction:"Додай картинку 🖼️",
  hint:"Використай <img>",
- example:'<img src="cat.jpg">',
- check:(doc)=>{
+example:'<img src="https://tse1.mm.bing.net/th/id/OIP.jgFz2YP5SildCutyqDuFTQHaFR?rs=1&pid=ImgDetMain&o=7&rm=3">', check:(doc)=>{
   return {ok: doc.querySelector("img"), errors: doc.querySelector("img")?[]:["❌ Додай <img>"]}
  }
 },
 
 {
  t:"🐱 Рівень 7",
- instruction:"Зроби список 📝",
+ instruction:"Зроби список що люить твоя тваринка📝",
  hint:"<ul> + <li>",
- example:"<ul><li>Кіт</li></ul>",
+ example:"<ul>
+   <li>гратися </li>
+   <li>спати</li>
+   <li>їсти</li>
+   </ul>",
  check:(doc)=>{
   let el = doc.querySelector("ul");
   return {ok: el && el.querySelector("li"), errors: !el?["❌ Додай список <ul>"]:[]}
@@ -297,7 +302,11 @@ const tasks = [
  t:"🐶 Рівень 8",
  instruction:"Зроби нумерований список 🔢",
  hint:"<ol>",
- example:"<ol><li>Кіт</li></ol>",
+ example:"<ol>
+    <li>гратися </li>
+   <li>спати</li>
+   <li>їсти</li>
+   </ol>",
  check:(doc)=>{
   let el = doc.querySelector("ol");
   return {ok: el && el.querySelector("li"), errors: !el?["❌ Додай <ol>"]:[]}
