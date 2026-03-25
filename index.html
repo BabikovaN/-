@@ -55,10 +55,24 @@ button{
   border:1px solid #ddd;
 }
 
+/* 🔥 ДОДАНО ВІДОБРАЖЕННЯ */
+#instruction{
+  font-size:18px;
+  font-weight:bold;
+}
+
+#hint{
+  color:#0984e3;
+}
+
 #example{
-  background:#f1f2f6;
-  border-left:6px solid #00cec9;
-  font-family: monospace;
+  background:#2d3436;
+  color:#00ffcc;
+  padding:10px;
+  border-radius:8px;
+  display:block;
+  margin-top:5px;
+  overflow:auto;
 }
 
 #explanation{
@@ -170,16 +184,16 @@ function escapeHTML(str){
   return str.replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
 
-// ✅ гарантія тексту
-function safeText(value){
-  return value ? value : "—";
+// ✅ гарантія що текст не пустий
+function safeText(v){
+  return v && v.trim() !== "" ? v : "—";
 }
 
 const tasks = [
 {
 t:"Заголовок",
 instruction:"Напиши HTML заголовок сторінки",
-hint:"Використай <h1>",
+hint:"Використай тег h1",
 exp:"<h1> створює головний заголовок",
 example:"<h1>Мій сайт</h1>",
 v:(c)=>c.includes("<h1>")
@@ -187,7 +201,7 @@ v:(c)=>c.includes("<h1>")
 {
 t:"Абзац",
 instruction:"Створи абзац",
-hint:"<p>",
+hint:"Використай тег p",
 exp:"Абзац тексту",
 example:"<p>Привіт</p>",
 v:(c)=>c.includes("<p>")
@@ -195,7 +209,7 @@ v:(c)=>c.includes("<p>")
 {
 t:"Жирний текст",
 instruction:"Зроби текст жирним",
-hint:"<b>",
+hint:"Використай тег b",
 exp:"Bold текст",
 example:"<b>Текст</b>",
 v:(c)=>c.includes("<b>")
@@ -203,7 +217,7 @@ v:(c)=>c.includes("<b>")
 {
 t:"Курсив",
 instruction:"Курсив",
-hint:"<i>",
+hint:"Використай тег i",
 exp:"Italic текст",
 example:"<i>Текст</i>",
 v:(c)=>c.includes("<i>")
@@ -211,7 +225,7 @@ v:(c)=>c.includes("<i>")
 {
 t:"Посилання",
 instruction:"Створи посилання",
-hint:"<a>",
+hint:"Використай тег a",
 exp:"Link",
 example:'<a href="#">Сайт</a>',
 v:(c)=>c.includes("<a")
@@ -219,7 +233,7 @@ v:(c)=>c.includes("<a")
 {
 t:"Зображення",
 instruction:"Додай картинку",
-hint:"<img>",
+hint:"Використай тег img",
 exp:"Image",
 example:'<img src="img.jpg">',
 v:(c)=>c.includes("<img")
@@ -227,7 +241,7 @@ v:(c)=>c.includes("<img")
 {
 t:"Список",
 instruction:"Створи список",
-hint:"<ul>",
+hint:"Використай ul",
 exp:"List",
 example:"<ul><li>1</li></ul>",
 v:(c)=>c.includes("<ul")
@@ -235,7 +249,7 @@ v:(c)=>c.includes("<ul")
 {
 t:"Нумерований список",
 instruction:"Нумерований список",
-hint:"<ol>",
+hint:"Використай ol",
 exp:"Ordered list",
 example:"<ol><li>1</li></ol>",
 v:(c)=>c.includes("<ol")
@@ -243,7 +257,7 @@ v:(c)=>c.includes("<ol")
 {
 t:"Контейнер",
 instruction:"Блок",
-hint:"<div>",
+hint:"Використай div",
 exp:"Container",
 example:"<div>Текст</div>",
 v:(c)=>c.includes("<div")
@@ -251,7 +265,7 @@ v:(c)=>c.includes("<div")
 {
 t:"Кнопка",
 instruction:"Кнопка",
-hint:"<button>",
+hint:"Використай button",
 exp:"Button",
 example:"<button>OK</button>",
 v:(c)=>c.includes("<button")
@@ -259,7 +273,7 @@ v:(c)=>c.includes("<button")
 {
 t:"Форма",
 instruction:"Форма",
-hint:"<form>",
+hint:"Використай form",
 exp:"Form",
 example:"<form></form>",
 v:(c)=>c.includes("<form")
@@ -267,30 +281,22 @@ v:(c)=>c.includes("<form")
 ];
 
 function showTab(tab){
-  document.getElementById("game").classList.add("hidden");
+  document.getElementById("game").classList.remove("hidden");
   document.getElementById("profile").classList.add("hidden");
-  document.getElementById(tab).classList.remove("hidden");
 }
 
 function loadLevel(i){
   currentLevel = i;
-  showTab('game');
 
   let t = tasks[i];
 
   document.getElementById("lessonTitle").innerText = safeText(t.t);
-
-  // ✅ ВІДОБРАЖЕННЯ ВСІХ БЛОКІВ
   document.getElementById("instruction").innerText = "📌 " + safeText(t.instruction);
   document.getElementById("hint").innerText = "💡 " + safeText(t.hint);
   document.getElementById("explanation").innerText = safeText(t.exp);
-  document.getElementById("example").textContent = t.example || "";
+  document.getElementById("example").textContent = safeText(t.example);
 
   document.getElementById("code").value = savedCode[i] || "";
-
-  document.getElementById("preview").innerHTML = "";
-  document.getElementById("codeView").innerHTML = "";
-  document.getElementById("msg").innerText = "";
 }
 
 function check(){
@@ -298,9 +304,6 @@ function check(){
   let code = document.getElementById("code").value;
   let t = tasks[currentLevel];
   let preview = document.getElementById("preview");
-
-  savedCode[currentLevel] = code;
-  localStorage.setItem("savedCode", JSON.stringify(savedCode));
 
   if(!t.v(code)){
     document.getElementById("msg").innerText="❌ Помилка";
@@ -315,26 +318,16 @@ function check(){
   document.getElementById("codeView").innerHTML = escapeHTML(code);
   preview.innerHTML = code;
 
-  user.xp += 20;
-  if(user.xp >= 100){
-    user.level++;
-    user.xp = 0;
-  }
+  savedCode[currentLevel] = code;
+  localStorage.setItem("savedCode", JSON.stringify(savedCode));
 
-  localStorage.setItem("user",JSON.stringify(user));
-  updateUI();
+  user.xp += 20;
 
   if(currentLevel < tasks.length - 1){
     setTimeout(()=>loadLevel(currentLevel + 1), 800);
   }
 }
 
-function updateUI(){
-  document.getElementById("xp").innerText = user.xp;
-  document.getElementById("levelUser").innerText = user.level;
-}
-
-updateUI();
 loadLevel(0);
 
 </script>
