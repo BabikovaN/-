@@ -131,7 +131,6 @@ function restartGame(){
 <audio id="successSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
 <audio id="failSound" src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg"></audio>
 
-<script>
 
 <script>
 
@@ -191,7 +190,7 @@ document.getElementById("code").addEventListener("input", updatePreview);
 // ===== INIT =====
 updatePreview();
 
-</script>
+
 // ===== TASKS (12 рівнів) =====
 const tasks = [
 {
@@ -240,14 +239,14 @@ const tasks = [
  t:"🐱 Рівень 7",
  instruction:"Список 📝",
  hint:"<ul><li>",
- example:`<ul><li>1</li></ul>`,
+ example:`<ul><li>1</li><li>2</li><li>3</li></ul>`,
  check:(doc)=>({ok: doc.querySelector("ul") && doc.querySelector("li"), errors:[]})
 },
 {
  t:"🐶 Рівень 8",
  instruction:"Нумерований список 🔢",
  hint:"<ol>",
- example:`<ol><li>1</li></ol>`,
+ example:`<ol><li>1</li><li>2</li><li>3</li></ol>`,
  check:(doc)=>({ok: doc.querySelector("ol") && doc.querySelector("li"), errors:[]})
 },
 {
