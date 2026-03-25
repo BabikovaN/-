@@ -148,7 +148,6 @@ h2, h3 {
     gap:5px;
     text-align:center;
   }
-    }
 
 </style>
 </head>
@@ -266,7 +265,7 @@ const tasks = [
  t:"🐱 Рівень 5",
  instruction:"Додай посилання 🔗",
  hint:"Використай <a href>",
- example:'<a href="https://example.com">Посилання</a>',
+ example:'<a href="#">Тут</a>' ( https://tse1.mm.bing.net/th/id/OIP.jgFz2YP5SildCutyqDuFTQHaFR?rs=1&pid=ImgDetMain&o=7&rm=3 додай це посилання замість # ),
  check:(doc)=>{
   let el = doc.querySelector("a");
   return {ok: el && el.hasAttribute("href"), errors: !el?["❌ Додай <a>"]:[]}
@@ -277,7 +276,8 @@ const tasks = [
  t:"🐶 Рівень 6",
  instruction:"Додай картинку 🖼️",
  hint:"Використай <img>",
-example:'<img src="https://tse1.mm.bing.net/th/id/OIP.jgFz2YP5SildCutyqDuFTQHaFR?rs=1&pid=ImgDetMain&o=7&rm=3">', check:(doc)=>{
+ example:'<img src="https://tse1.mm.bing.net/th/id/OIP.jgFz2YP5SildCutyqDuFTQHaFR?rs=1&pid=ImgDetMain&o=7&rm=3">' https://tse1.mm.bing.net/th/id/OIP.jgFz2YP5SildCutyqDuFTQHaFR?rs=1&pid=ImgDetMain&o=7&rm=3 додай це посилання в сій код ,
+ check:(doc)=>{
   return {ok: doc.querySelector("img"), errors: doc.querySelector("img")?[]:["❌ Додай <img>"]}
  }
 },
@@ -443,4 +443,4 @@ loadLevel(user.currentLevel || 0);
 </script>
 
 </body>
-</html>
+</html> 
