@@ -62,10 +62,19 @@ button{
 
 .info-box{
   background:#f1f2f6;
-  padding:10px;
+  padding:12px;
   margin-top:10px;
   border-radius:10px;
   text-align:left;
+  line-height:1.5;
+}
+
+pre{
+  background:#2d3436;
+  color:#00ffcc;
+  padding:10px;
+  border-radius:10px;
+  overflow-x:auto;
 }
 </style>
 </head>
@@ -82,7 +91,6 @@ button{
   <button onclick="showTab('profile')">👤 Профіль</button>
 </div>
 
-<!-- GAME -->
 <div id="game" class="card">
 
   <h2 id="lessonTitle"></h2>
@@ -102,13 +110,11 @@ button{
 
 </div>
 
-<!-- LEVELS -->
 <div id="levels" class="card hidden">
   <h2>📋 Рівні</h2>
   <div id="levelsGrid" class="level-grid"></div>
 </div>
 
-<!-- PROFILE -->
 <div id="profile" class="card hidden">
   <h2>👤 Профіль</h2>
   XP: <span id="xp"></span><br>
@@ -132,7 +138,13 @@ let user = JSON.parse(localStorage.getItem("user")) || {
 
 let currentLevel = 0;
 
-constconst tasks = [
+function escapeHTML(str){
+  return str
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;");
+}
+
+const tasks = [
 {
 t:"Заголовок",
 instruction:"Створи заголовок за допомогою тегу h1",
@@ -173,14 +185,11 @@ exp:"Посилання",
 example:'<a href="#">Сайт</a>',
 v:(c)=>c.includes("<a")
 },
-
-// ➕ ДОДАНІ РІВНІ
-
 {
 t:"Зображення",
-instruction:"Додай зображення на сторінку",
-hint:"Тег <img src>",
-exp:"<img> використовується для картинок",
+instruction:"Додай зображення",
+hint:"<img src>",
+exp:"Тег для картинок",
 example:'<img src="image.jpg">',
 v:(c)=>c.includes("<img")
 },
@@ -188,44 +197,43 @@ v:(c)=>c.includes("<img")
 t:"Список",
 instruction:"Створи список",
 hint:"<ul> і <li>",
-exp:"Списки використовуються для переліків",
-example:"<ul><li>1</li><li>2</li></ul>",
+exp:"Списки",
+example:"<ul><li>1</li></ul>",
 v:(c)=>c.includes("<ul>")
 },
 {
 t:"Нумерований список",
 instruction:"Створи нумерований список",
-hint:"<ol> і <li>",
-exp:"Нумерований список має цифри",
-example:"<ol><li>1</li><li>2</li></ol>",
+hint:"<ol>",
+exp:"Нумерований список",
+example:"<ol><li>1</li></ol>",
 v:(c)=>c.includes("<ol>")
 },
 {
 t:"Контейнер",
-instruction:"Створи блок div",
-hint:"Тег <div>",
-exp:"div використовується для структури",
-example:"<div>Контент</div>",
+instruction:"Створи блок",
+hint:"div",
+exp:"Контейнер",
+example:"<div>Текст</div>",
 v:(c)=>c.includes("<div")
 },
 {
 t:"Кнопка",
 instruction:"Створи кнопку",
-hint:"Тег <button>",
-exp:"Кнопки використовуються для дій",
-example:"<button>Натисни</button>",
+hint:"button",
+exp:"Кнопка",
+example:"<button>OK</button>",
 v:(c)=>c.includes("<button")
 },
 {
 t:"Форма",
 instruction:"Створи форму",
-hint:"Тег <form>",
-exp:"Форми використовуються для введення даних",
+hint:"form",
+exp:"Форма",
 example:"<form></form>",
 v:(c)=>c.includes("<form")
 }
 ];
-  
 
 function showTab(tab){
   document.getElementById("game").classList.add("hidden");
@@ -247,10 +255,10 @@ function loadLevel(i){
   let t = tasks[i];
 
   document.getElementById("lessonTitle").innerText = t.t;
-  document.getElementById("instruction").innerHTML = "📌 Завдання: " + t.instruction;
-  document.getElementById("hint").innerHTML = "💡 Підказка: " + t.hint;
-  document.getElementById("explanation").innerHTML = "🧠 Пояснення: " + t.exp;
-  document.getElementById("example").innerHTML = "🧾 Приклад: <pre>"+t.example+"</pre>";
+  document.getElementById("instruction").innerHTML = "📌 Завдання:<br>" + t.instruction;
+  document.getElementById("hint").innerHTML = "💡 Підказка:<br>" + t.hint;
+  document.getElementById("explanation").innerHTML = "🧠 Пояснення:<br>" + t.exp;
+  document.getElementById("example").innerHTML = "🧾 Приклад:<pre>" + escapeHTML(t.example) + "</pre>";
 
   document.getElementById("code").value="";
 }
