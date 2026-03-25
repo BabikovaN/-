@@ -3,113 +3,168 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Малий веб-розробник</title>
+<title>Навчальна HTML гра</title>
 
 <style>
-* { box-sizing: border-box; }
-
-body {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  margin: 0;
-  background: linear-gradient(135deg, #74b9ff, #a29bfe);
+body{
+  font-family: Arial;
+  margin:0;
+  background: linear-gradient(135deg,#74b9ff,#a29bfe);
+  text-align:center;
 }
 
-.container {
-  max-width: 600px;
-  margin: auto;
-  padding: 15px;
+h1{color:white}
+
+.container{
+  max-width:700px;
+  margin:auto;
+  padding:10px;
 }
 
-h1 { color: white; }
-
-.card {
-  background: white;
-  border-radius: 20px;
-  padding: 15px;
-  margin-top: 15px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+.card{
+  background:white;
+  padding:20px;
+  margin:15px;
+  border-radius:15px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
 
-button {
-  padding: 15px;
-  margin: 8px;
-  font-size: 18px;
-  border: none;
-  border-radius: 12px;
-  background: #4da3ff;
-  color: white;
-  width: 90%;
-  max-width: 300px;
+textarea,input{
+  width:95%;
+  max-width:500px;
+  padding:10px;
+  margin:10px 0;
+  font-size:16px;
 }
 
-button:active { transform: scale(0.95); }
-
-input, textarea {
-  width: 90%;
-  max-width: 300px;
-  padding: 10px;
-  margin: 8px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
-}
-
-.hint {
-  background: #ffeaa7;
-  padding: 10px;
-  border-radius: 12px;
-  margin: 10px 0;
-}
-
-.example {
-  background: #dfe6e9;
-  padding: 10px;
-  border-radius: 10px;
-  font-family: monospace;
-  margin: 10px 0;
-}
-
-#movingBox {
-  width:50px;
-  height:50px;
-  background:red;
-  position:relative;
-  margin:10px auto;
+button{
+  padding:12px 20px;
+  margin-top:10px;
+  font-size:16px;
+  border:none;
   border-radius:10px;
+  background:#4da3ff;
+  color:white;
+}
+
+.error{color:red;font-weight:bold;}
+.success{color:green;font-weight:bold;}
+
+.example{
+  background:#dfe6e9;
+  padding:10px;
+  border-radius:10px;
+  font-family:monospace;
 }
 </style>
-
 </head>
+
 <body>
 
+<h1>🎮 Навчайся HTML</h1>
+
 <div class="container">
+  <div class="card">
+    <div id="task"></div>
 
-<h1>🎮 Малий веб-розробник</h1>
-<p style="color:white;">Створи сайт про тваринку 🐱</p>
+    <textarea id="code" placeholder="Впиши свій код тут..."></textarea>
 
-<div id="gameArea"></div>
-<div id="output"></div>
-<div id="error" style="color:red; font-weight:bold;"></div>
+    <br>
+    <button onclick="check()">Перевірити</button>
+
+    <p id="msg"></p>
+
+    <div id="preview"></div>
+  </div>
+</div>
 
 <script>
 
-let level = 1;
-let output = document.getElementById("output");
-let gameArea = document.getElementById("gameArea");
-let errorBox = document.getElementById("error");
+let level = 0;
 
-/* 🔍 перевірка HTML */
-function checkHTML(code){
+const tasks = [
+{
+  text: "Зроби заголовок",
+  example: "<h1>Мій кіт</h1>",
+  check: (code)=> code.includes("<h1>") && code.includes("</h1>")
+},
+{
+  text: "Зроби абзац",
+  example: "<p>Привіт</p>",
+  check: (code)=> code.includes("<p>") && code.includes("</p>")
+},
+{
+  text: "Додай картинку",
+  example: '<img src="https://placekitten.com/200/200">',
+  check: (code)=> code.includes("<img") && code.includes("src=")
+},
+{
+  text: "Зроби список",
+  example: "<ul><li>Кіт</li><li>Пес</li></ul>",
+  check: (code)=> code.includes("<ul>") && code.includes("<li>")
+}
+];
+
+function loadTask(){
+  if(level >= tasks.length){
+    document.getElementById("task").innerHTML = "🎉 Вітаємо! Ти пройшов всі рівні!";
+    return;
+  }
+
+  let t = tasks[level];
+
+  document.getElementById("task").innerHTML = `
+    <h2>${t.text}</h2>
+    <p>Приклад:</p>
+    <div class="example">${t.example}</div>
+  `;
+
+  document.getElementById("code").value = "";
+  document.getElementById("msg").innerHTML = "";
+  document.getElementById("preview").innerHTML = "";
+}
+
+function check(){
+  let code = document.getElementById("code").value;
+  let t = tasks[level];
+
+  // базова перевірка пустоти
+  if(!code.trim()){
+    document.getElementById("msg").innerHTML = "❌ Введи код";
+    return;
+  }
+
+  // перевірка HTML балансу тегів
+  if(!isValidHTML(code)){
+    document.getElementById("msg").innerHTML = "❌ Помилка в тегах (перевір закриття)";
+    return;
+  }
+
+  // логічна перевірка рівня
+  if(!t.check(code)){
+    document.getElementById("msg").innerHTML = "❌ Невірне завдання";
+    return;
+  }
+
+  document.getElementById("msg").innerHTML = "✅ Правильно!";
+  document.getElementById("preview").innerHTML = code;
+
+  level++;
+  setTimeout(loadTask, 1500);
+}
+
+/* 🔍 перевірка HTML тегів */
+function isValidHTML(code){
   let stack = [];
   let tags = code.match(/<\/?[^>]+>/g);
 
-  if(!tags) return "ok";
+  if(!tags) return true;
 
   for(let tag of tags){
     if(tag.startsWith("</")){
       let name = tag.replace("</","").replace(">","");
       if(stack.length === 0 || stack.pop() !== name){
-        return "❌ Помилка: неправильне закриття тега " + tag;
+        return false;
       }
     } else if(!tag.endsWith("/>")){
       let name = tag.replace("<","").replace(">","");
@@ -117,240 +172,12 @@ function checkHTML(code){
     }
   }
 
-  if(stack.length > 0){
-    return "❌ Тег не закритий: <" + stack.pop() + ">";
-  }
-
-  return "ok";
+  return stack.length === 0;
 }
 
-/* 🔍 додаткова проста перевірка */
-function hasBrokenTags(text){
-  let open = (text.match(/<[^/][^>]*>/g) || []).length;
-  let close = (text.match(/<\/[^>]+>/g) || []).length;
-
-  return open !== close;
-}
-
-function loadLevel(){
-  gameArea.innerHTML="";
-  output.innerHTML="";
-  errorBox.innerText="";
-
-  switch(level){
-
-    case 1:
-      gameArea.innerHTML=`
-      <div class="card">
-        <h2>Зроби кнопку червоною 🔴</h2>
-        <button onclick="setColor('red')">🔴</button>
-        <button onclick="setColor('blue')">🔵</button>
-        <button onclick="setColor('green')">🟢</button>
-        <br><button id="gameBtn">Кнопка</button>
-      </div>`;
-    break;
-
-    case 2:
-      gameArea.innerHTML=`
-      <div class="card">
-        <h2>Заголовок</h2>
-        <div class="example">&lt;h1&gt;Мій кіт&lt;/h1&gt;</div>
-        <input id="titleInput" placeholder="Мій кіт">
-        <button onclick="setTitle()">Створити</button>
-      </div>`;
-    break;
-
-    case 3:
-      gameArea.innerHTML=`
-      <div class="card">
-        <h2>Опис</h2>
-        <div class="example">&lt;p&gt;Мій кіт...&lt;/p&gt;</div>
-        <textarea id="textInput"></textarea>
-        <button onclick="setParagraph()">Додати</button>
-      </div>`;
-    break;
-
-    case 4:
-      gameArea.innerHTML=`
-      <div class="card">
-        <h2>Картинка</h2>
-        <input id="imgInput">
-        <button onclick="setImage()">Додати</button>
-      </div>`;
-    break;
-
-    case 5:
-      gameArea.innerHTML=`
-      <div class="card">
-        <h2>Список</h2>
-        <input id="listInput" placeholder="м'яч, рибка">
-        <button onclick="setList()">Додати</button>
-      </div>`;
-    break;
-
-    case 6:
-      gameArea.innerHTML=`
-      <div class="card">
-        <h2>Зміна кольору</h2>
-        <p id="text">Мій кіт</p>
-        <button onclick="changeTextColor()">Змінити</button>
-      </div>`;
-    break;
-
-    case 7:
-      gameArea.innerHTML=`
-      <div class="card">
-        <h2>Зміна тексту</h2>
-        <p id="text2">Привіт</p>
-        <button onclick="changeTextContent()">Натисни</button>
-      </div>`;
-    break;
-
-    case 8:
-      gameArea.innerHTML=`
-      <div class="card">
-        <h2>Новий текст</h2>
-        <button onclick="addParagraph()">Додати</button>
-      </div>`;
-    break;
-
-    case 9:
-      gameArea.innerHTML=`
-      <div class="card">
-        <h2>Фон</h2>
-        <img src="https://placekitten.com/200/200" onclick="changeBg()">
-      </div>`;
-    break;
-
-    case 10:
-      gameArea.innerHTML=`
-      <div class="card">
-        <h2>Рух</h2>
-        <div id="movingBox"></div>
-        <button onclick="moveBox()">Рухати</button>
-      </div>`;
-    break;
-
-    case 11:
-      gameArea.innerHTML=`
-      <div class="card">
-        <h2>Фінал 🎉</h2>
-        <textarea id="finalSite" rows="8"></textarea>
-        <button onclick="showFinalSite()">Показати</button>
-      </div>`;
-    break;
-  }
-}
-
-function setColor(c){
-  document.getElementById("gameBtn").style.background=c;
-  if(c==="red") next();
-}
-
-function setTitle(){
-  let v = titleInput.value;
-
-  if(hasBrokenTags(v)){
-    errorBox.innerText = "❌ Неправильний HTML";
-    return;
-  }
-
-  output.innerHTML="<h1>"+v+"</h1>";
-  next();
-}
-
-function setParagraph(){
-  let v = textInput.value;
-
-  if(hasBrokenTags(v)){
-    errorBox.innerText = "❌ Неправильний HTML у тексті";
-    return;
-  }
-
-  output.innerHTML="<p>"+v+"</p>";
-  next();
-}
-
-function setImage(){
-  let v = imgInput.value;
-
-  if(hasBrokenTags(v)){
-    errorBox.innerText = "❌ Неправильний HTML";
-    return;
-  }
-
-  output.innerHTML="<img src='"+v+"'>";
-  next();
-}
-
-function setList(){
-  let v = listInput.value;
-
-  if(hasBrokenTags(v)){
-    errorBox.innerText = "❌ Неправильний HTML";
-    return;
-  }
-
-  let items = v.split(",");
-  let html = "<ul>";
-  items.forEach(i=> html+="<li>"+i+"</li>");
-  html+="</ul>";
-
-  output.innerHTML = html;
-  next();
-}
-
-function changeTextColor(){
-  document.getElementById("text").style.color="red";
-}
-
-function changeTextContent(){
-  document.getElementById("text2").innerText="🎉";
-  next();
-}
-
-function addParagraph(){
-  output.innerHTML+="<p>Новий текст</p>";
-  next();
-}
-
-function changeBg(){
-  document.body.style.background="lightblue";
-}
-
-function moveBox(){
-  let b=document.getElementById("movingBox");
-  let p=0;
-  let i=setInterval(()=>{
-    if(p>200) clearInterval(i);
-    p+=5;
-    b.style.left=p+"px";
-  },50);
-}
-
-function showFinalSite(){
-  let code = finalSite.value;
-
-  let result = checkHTML(code);
-
-  if(result !== "ok"){
-    errorBox.innerText = result;
-    return;
-  }
-
-  output.innerHTML = code;
-}
-
-function next(){
-  output.innerHTML+="<p>🎉 Молодець!</p>";
-  level++;
-  setTimeout(loadLevel,1000);
-}
-
-loadLevel();
+loadTask();
 
 </script>
 
-</div>
 </body>
 </html>
