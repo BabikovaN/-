@@ -7,8 +7,6 @@
 <style>
 body {
   font-family: Arial;
-  font-size:20px;
-  line-height:1.6;
   margin:0;
   background:#eef2f7;
 }
@@ -54,33 +52,14 @@ textarea {
 }
 
 button {
-  font-size:20px;
-  padding:14px;
-  border-radius:12px;
+  padding:10px;
   margin-top:10px;
   cursor:pointer;
 }
 
-h2, h3 {
-  text-align:center;
-}
-
-#instruction {
-  font-size:22px;
-  font-weight:bold;
-}
-
-#msg {
-  font-size:22px;
-  text-align:center;
-}
-
 #preview {
-  font-size:18px;
-  background:#fff;
-  border-radius:10px;
-  padding:15px;
   border:1px solid #ccc;
+  padding:10px;
   min-height:150px;
 }
 
@@ -107,8 +86,7 @@ h2, h3 {
 
 #hintBox {
   display:none;
-  background:#dff6ff;
-  color:#000;
+  background:#333;
   padding:10px;
   border-radius:8px;
   margin-top:10px;
@@ -123,32 +101,42 @@ h2, h3 {
   50% { transform:scale(1.1); }
   100% { transform:scale(1); }
 }
+  body {
+  font-size:20px;
+  line-height:1.6;
+}
 
-@media (max-width: 768px) {
-  .container {
-    flex-direction: column;
-  }
+button {
+  font-size:20px;
+  padding:14px;
+  border-radius:12px;
+}
 
-  .panel {
-    height:auto;
-  }
+h2, h3 {
+  text-align:center;
+}
 
-  textarea {
-    height:200px;
-    font-size:16px;
-  }
+#instruction {
+  font-size:22px;
+  font-weight:bold;
+}
 
-  button {
-    width:100%;
-    font-size:16px;
-  }
+#msg {
+  font-size:22px;
+  text-align:center;
+}
 
-  .header {
-    flex-direction:column;
-    gap:5px;
-    text-align:center;
-  }
+#hintBox {
+  background:#dff6ff;
+  color:#000;
+}
 
+#preview {
+  font-size:18px;
+  background:#fff;
+  border-radius:10px;
+  padding:15px;
+}
 </style>
 </head>
 
@@ -226,7 +214,7 @@ const tasks = [
  example:"<h1>Кіт</h1>",
  check:(doc)=>{
   let el = doc.querySelector("h1");
-  return {ok: el && el.textContent.trim().length>0, errors: !el?["❌ Додай заголовок <h1>"]:[]}
+  return {ok: el && el.textContent.trim().length>0, errors: !el?["❌ Додай <h1>"]:[]}
  }
 },
 
@@ -237,7 +225,7 @@ const tasks = [
  example:"<p>Я люблю котів</p>",
  check:(doc)=>{
   let el = doc.querySelector("p");
-  return {ok: el && el.textContent.trim().length>0, errors: !el?["❌ Додай абзац <p>"]:[]}
+  return {ok: el && el.textContent.trim().length>0, errors: !el?["❌ Додай <p>"]:[]}
  }
 },
 
@@ -265,7 +253,7 @@ const tasks = [
  t:"🐱 Рівень 5",
  instruction:"Додай посилання 🔗",
  hint:"Використай <a href>",
- example:'<a href="#">Тут</a>' ( https://tse1.mm.bing.net/th/id/OIP.jgFz2YP5SildCutyqDuFTQHaFR?rs=1&pid=ImgDetMain&o=7&rm=3 додай це посилання замість # ),
+ example:'<a href="https://example.com">Тут</a>',
  check:(doc)=>{
   let el = doc.querySelector("a");
   return {ok: el && el.hasAttribute("href"), errors: !el?["❌ Додай <a>"]:[]}
@@ -276,39 +264,55 @@ const tasks = [
  t:"🐶 Рівень 6",
  instruction:"Додай картинку 🖼️",
  hint:"Використай <img>",
- example:'<img src="https://tse1.mm.bing.net/th/id/OIP.jgFz2YP5SildCutyqDuFTQHaFR?rs=1&pid=ImgDetMain&o=7&rm=3">' https://tse1.mm.bing.net/th/id/OIP.jgFz2YP5SildCutyqDuFTQHaFR?rs=1&pid=ImgDetMain&o=7&rm=3 додай це посилання в сій код ,
+ example:`<img src="https://tse1.mm.bing.net/th/id/OIP.jgFz2YP5SildCutyqDuFTQHaFR?rs=1&pid=ImgDetMain&o=7&rm=3">`,
  check:(doc)=>{
-  return {ok: doc.querySelector("img"), errors: doc.querySelector("img")?[]:["❌ Додай <img>"]}
+  let el = doc.querySelector("img");
+  return {
+    ok: el && el.hasAttribute("src"),
+    errors: !el ? ["❌ Додай <img>"] : []
+  }
  }
 },
 
 {
  t:"🐱 Рівень 7",
- instruction:"Зроби список що люить твоя тваринка📝",
+ instruction:"Зроби список улюблених речей 📝",
  hint:"<ul> + <li>",
- example:"<ul>
-   <li>гратися </li>
-   <li>спати</li>
-   <li>їсти</li>
-   </ul>",
+ example:`
+<ul>
+  <li>🐟 рибка</li>
+  <li>🛏️ спати</li>
+  <li>🎾 гратися</li>
+</ul>
+`,
  check:(doc)=>{
-  let el = doc.querySelector("ul");
-  return {ok: el && el.querySelector("li"), errors: !el?["❌ Додай список <ul>"]:[]}
+  let ul = doc.querySelector("ul");
+  let li = doc.querySelector("li");
+  return {
+    ok: ul && li,
+    errors: !ul ? ["❌ Додай <ul>"] : (!li ? ["❌ Додай <li>"] : [])
+  }
  }
 },
 
 {
  t:"🐶 Рівень 8",
  instruction:"Зроби нумерований список 🔢",
- hint:"<ol>",
- example:"<ol>
-    <li>гратися </li>
-   <li>спати</li>
-   <li>їсти</li>
-   </ol>",
+ hint:"<ol> + <li>",
+ example:`
+<ol>
+  <li>Прокинутись 😴</li>
+  <li>Погратися 🧸</li>
+  <li>Поїсти 🍖</li>
+</ol>
+`,
  check:(doc)=>{
-  let el = doc.querySelector("ol");
-  return {ok: el && el.querySelector("li"), errors: !el?["❌ Додай <ol>"]:[]}
+  let ol = doc.querySelector("ol");
+  let li = doc.querySelector("li");
+  return {
+    ok: ol && li,
+    errors: !ol ? ["❌ Додай <ol>"] : (!li ? ["❌ Додай <li>"] : [])
+  }
  }
 },
 
@@ -341,9 +345,26 @@ const tasks = [
  check:(doc)=>{
   return {ok: doc.querySelector("form"), errors: doc.querySelector("form")?[]:["❌ Додай <form>"]}
  }
+},
+
+// ✅ ФІНАЛ
+{
+ t:"🏆 Рівень 12",
+ instruction:"Фінал! Покажи результат 🎉",
+ hint:"Наприклад: <h1>Я молодець!</h1>",
+ example:"<h1>Я молодець!</h1>",
+ check:(doc)=>{
+  let el = doc.querySelector("h1");
+  return {
+    ok: el && el.textContent.trim().length > 0,
+    errors: !el ? ["❌ Додай фінальний результат <h1>"] : []
+  }
+ }
 }
 
 ];
+
+
 // ===== UI =====
 function updateUI(){
  document.getElementById("xp").innerText = user.xp;
@@ -375,57 +396,38 @@ function loadLevel(i){
 function updatePreview(){
  let code = document.getElementById("code").value;
  document.getElementById("codeView").innerText = code;
-
+ document.getElementById("preview").innerHTML = code;
 }
 
 // ===== CHECK =====
 function check(){
-  let code = document.getElementById("code").value;
-  let doc = parseHTML(code);
-  let task = tasks[user.currentLevel];
+ let code = document.getElementById("code").value;
+ let doc = parseHTML(code);
+ let task = tasks[user.currentLevel];
 
-  let result = task.check(doc);
+ let result = task.check(doc);
 
-  if(result.ok){
-    document.getElementById("msg").innerText = "✅ Правильно!";
-    document.getElementById("msg").classList.add("success");
-    document.getElementById("successSound").play();
+ if(result.ok){
+  document.getElementById("msg").innerText = "✅ Правильно!";
+  document.getElementById("msg").classList.add("success");
+  document.getElementById("successSound").play();
 
-    user.xp += 20;
-    user.streak += 1;
+  user.xp += 20;
+  user.streak += 1;
 
-    // збереження коду рівня
-    localStorage.setItem("code_"+user.currentLevel, code);
+  localStorage.setItem("code_"+user.currentLevel, code);
 
-    // 👉 ДОБАВЛЕННЯ РЕЗУЛЬТАТУ (НЕ ЗАМІНА)
-    const preview = document.getElementById("preview");
-    const codeView = document.getElementById("codeView");
-
-    preview.innerHTML += `
-      <div class="level-result">
-        <h4>Рівень ${user.currentLevel + 1}</h4>
-        ${code}
-      </div>
-    `;
-
-    codeView.textContent += `
-\n--- Рівень ${user.currentLevel + 1} ---\n
-${code}
-    `;
-
-    // перехід на наступний рівень
-    if(user.currentLevel < tasks.length - 1){
-      loadLevel(user.currentLevel + 1);
-    }
-
-  } else {
-    document.getElementById("msg").innerText = result.errors.join(" | ");
-    document.getElementById("failSound").play();
+  if(user.currentLevel < tasks.length-1){
+   loadLevel(user.currentLevel+1);
   }
 
-  // збереження користувача
-  localStorage.setItem("user", JSON.stringify(user));
-  updateUI();
+ } else {
+  document.getElementById("msg").innerText = result.errors.join(" | ");
+  document.getElementById("failSound").play();
+ }
+
+ localStorage.setItem("user", JSON.stringify(user));
+ updateUI();
 }
 
 // ===== HINT =====
@@ -443,4 +445,4 @@ loadLevel(user.currentLevel || 0);
 </script>
 
 </body>
-</html> 
+</html>
