@@ -29,7 +29,7 @@ h1{color:white}
   box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
 
-textarea,input{
+textarea{
   width:95%;
   max-width:500px;
   padding:10px;
@@ -86,28 +86,45 @@ const tasks = [
 {
   text: "Зроби заголовок",
   example: "<h1>Мій кіт</h1>",
-  check: (code)=> code.includes("<h1>") && code.includes("</h1>")
+  validate: (code) => {
+    if(!code.includes("<h1>")) return "❌ Немає <h1>";
+    if(!code.includes("</h1>")) return "❌ Немає закриваючого </h1>";
+    return "ok";
+  }
 },
 {
   text: "Зроби абзац",
   example: "<p>Привіт</p>",
-  check: (code)=> code.includes("<p>") && code.includes("</p>")
+  validate: (code) => {
+    if(!code.includes("<p>")) return "❌ Немає <p>";
+    if(!code.includes("</p>")) return "❌ Немає </p>";
+    return "ok";
+  }
 },
 {
   text: "Додай картинку",
   example: '<img src="https://placekitten.com/200/200">',
-  check: (code)=> code.includes("<img") && code.includes("src=")
+  validate: (code) => {
+    if(!code.includes("<img")) return "❌ Немає <img>";
+    if(!code.includes("src=")) return "❌ Немає src";
+    return "ok";
+  }
 },
 {
   text: "Зроби список",
   example: "<ul><li>Кіт</li><li>Пес</li></ul>",
-  check: (code)=> code.includes("<ul>") && code.includes("<li>")
+  validate: (code) => {
+    if(!code.includes("<ul>")) return "❌ Немає <ul>";
+    if(!code.includes("</ul>")) return "❌ Немає </ul>";
+    if(!code.includes("<li>")) return "❌ Немає <li>";
+    return "ok";
+  }
 }
 ];
 
 function loadTask(){
   if(level >= tasks.length){
-    document.getElementById("task").innerHTML = "🎉 Вітаємо! Ти пройшов всі рівні!";
+    document.getElementById("task").innerHTML = "🎉 Всі рівні пройдено!";
     return;
   }
 
@@ -125,38 +142,44 @@ function loadTask(){
 }
 
 function check(){
-  let code = document.getElementById("code").value;
+  let code = document.getElementById("code").value.trim();
   let t = tasks[level];
 
-  // базова перевірка пустоти
-  if(!code.trim()){
-    document.getElementById("msg").innerHTML = "❌ Введи код";
+  if(!code){
+    showError("❌ Введи код");
     return;
   }
 
-  // перевірка HTML балансу тегів
   if(!isValidHTML(code)){
-    document.getElementById("msg").innerHTML = "❌ Помилка в тегах (перевір закриття)";
+    showError("❌ Помилка в тегах (перевір закриття)");
     return;
   }
 
-  // логічна перевірка рівня
-  if(!t.check(code)){
-    document.getElementById("msg").innerHTML = "❌ Невірне завдання";
+  let result = t.validate(code);
+
+  if(result !== "ok"){
+    showError(result);
     return;
   }
 
-  document.getElementById("msg").innerHTML = "✅ Правильно!";
+  showSuccess("✅ Правильно!");
   document.getElementById("preview").innerHTML = code;
 
   level++;
   setTimeout(loadTask, 1500);
 }
 
-/* 🔍 перевірка HTML тегів */
+function showError(msg){
+  document.getElementById("msg").innerHTML = `<span class="error">${msg}</span>`;
+}
+
+function showSuccess(msg){
+  document.getElementById("msg").innerHTML = `<span class="success">${msg}</span>`;
+}
+
 function isValidHTML(code){
   let stack = [];
-  let tags = code.match(/<\/?[^>]+>/g);
+  let tags = code.match(/<\/??[^>]+>/g);
 
   if(!tags) return true;
 
@@ -166,7 +189,7 @@ function isValidHTML(code){
       if(stack.length === 0 || stack.pop() !== name){
         return false;
       }
-    } else if(!tag.endsWith("/>")){
+    } else if(!tag.endsWith("/>") && !tag.includes("img")){
       let name = tag.replace("<","").replace(">","");
       stack.push(name);
     }
