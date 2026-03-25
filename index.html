@@ -2,22 +2,28 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<title>HTML Pet Trainer 🐾</title>
+<title>Pet HTML Trainer 🐾</title>
 
 <style>
 body {
-  font-family: Arial;
-  background:#f4f6f9;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: linear-gradient(135deg, #f4f6f9, #e9f0ff);
   margin:20px;
+  color:#222;
 }
 
 .card {
   background:#fff;
-  padding:15px;
-  border-radius:12px;
-  margin-bottom:15px;
-  box-shadow:0 8px 20px rgba(0,0,0,0.1);
+  padding:20px;
+  border-radius:16px;
+  margin-bottom:20px;
+  box-shadow:0 10px 25px rgba(0,0,0,0.1);
+  transition:0.3s;
   animation: fadeIn 0.4s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
 }
 
 @keyframes fadeIn {
@@ -27,40 +33,78 @@ body {
 
 textarea {
   width:100%;
-  height:150px;
-  margin-top:10px;
+  height:160px;
+  padding:10px;
+  border-radius:10px;
+  border:1px solid #ccc;
+  font-size:14px;
 }
 
 #editorLayout {
   display:flex;
-  gap:10px;
+  gap:15px;
   flex-wrap:wrap;
 }
 
 #editorLayout > div {
   flex:1;
   min-width:300px;
-  background:#fff;
-  padding:10px;
-  border-radius:10px;
+  background:#ffffff;
+  padding:15px;
+  border-radius:12px;
+  box-shadow:0 5px 15px rgba(0,0,0,0.08);
 }
 
 button {
-  padding:10px 15px;
+  padding:10px 18px;
   margin-top:10px;
+  border:none;
+  border-radius:10px;
+  background:#4da3ff;
+  color:white;
+  font-weight:bold;
   cursor:pointer;
   transition:0.2s;
 }
 
 button:hover {
+  background:#2f8cff;
   transform:scale(1.05);
+}
+
+select {
+  padding:8px;
+  border-radius:8px;
+  margin-bottom:10px;
 }
 
 #hintBox {
   display:none;
-  background:#eef;
+  background:#eef3ff;
+  padding:12px;
+  border-radius:10px;
+  margin-top:10px;
+  border-left:5px solid #4da3ff;
+}
+
+pre {
+  background:#111;
+  color:#0f0;
   padding:10px;
-  border-radius:8px;
+  border-radius:10px;
+  overflow:auto;
+}
+
+#preview {
+  padding:10px;
+  border-radius:10px;
+  background:#fafafa;
+  min-height:100px;
+  border:1px solid #ddd;
+}
+
+#msg {
+  font-weight:bold;
   margin-top:10px;
 }
 </style>
@@ -69,184 +113,166 @@ button:hover {
 <body>
 
 <div class="card">
-  <h2 id="levelTitle"></h2>
 
-  <p><b>📌 Завдання:</b> <span id="instruction"></span></p>
+<h2 id="levelTitle"></h2>
 
-  <button onclick="toggleHint()">💡 Показати підказку</button>
+<select onchange="setRole(this.value)">
+  <option value="student">Дитина</option>
+  <option value="admin">Адмін</option>
+</select>
 
-  <div id="hintBox">
-    <p><b>💡 Підказка:</b> <span id="hint"></span></p>
-  </div>
+<p><b>📌 Завдання:</b> <span id="instruction"></span></p>
 
-  <p><b>🧪 Приклад:</b> <code id="example"></code></p>
+<button onclick="toggleHint()">💡 Показати підказку</button>
 
-  <textarea id="code"></textarea>
-
-  <button onclick="check()">Перевірити</button>
-
-  <p id="msg"></p>
-
-  <div id="editorLayout">
-    <div>
-      <h3>🧾 Код</h3>
-      <pre id="codeView"></pre>
-    </div>
-
-    <div>
-      <h3>👀 Результат</h3>
-      <div id="preview"></div>
-    </div>
-  </div>
+<div id="hintBox">
+<p><b>💡 Підказка:</b> <span id="hint"></span></p>
 </div>
+
+<p><b>🧪 Приклад:</b> <code id="example"></code></p>
+
+<textarea id="code"></textarea>
+
+<br>
+<button onclick="check()">Перевірити</button>
+<button onclick="showAchievements()">🏆 Досягнення</button>
+
+<p id="msg"></p>
+
+<div id="editorLayout">
+<div>
+<h3>🧾 Код</h3>
+<pre id="codeView"></pre>
+</div>
+
+<div>
+<h3>👀 Результат</h3>
+<div id="preview"></div>
+</div>
+</div>
+
+</div>
+
+<!-- SOUNDS -->
+<audio id="successSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
+<audio id="failSound" src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg"></audio>
 
 <script>
 
-// ===== LEVELS =====
+// ===== TASKS =====
 const tasks = [
-{
-t:"🐾 Рівень 1 — Заголовок",
-instruction:"Створи заголовок про свою тваринку",
-hint:"Використай <h1>",
-example:"<h1>Мій кіт</h1>",
-v:(c)=>/<h1>[\s\S]*<\/h1>/.test(c)
-},
-{
-t:"🐾 Рівень 2 — Абзац",
-instruction:"Додай опис тваринки",
-hint:"Використай <p>",
-example:"<p>Мій кіт милий</p>",
-v:(c)=>c.includes("<p>")
-},
-{
-t:"🐾 Рівень 3 — Жирний текст",
-instruction:"Зроби частину тексту жирною",
-hint:"Використай <b>",
-example:"<b>Кіт</b>",
-v:(c)=>c.includes("<b>")
-},
-{
-t:"🐾 Рівень 4 — Курсив",
-instruction:"Зроби текст курсивом",
-hint:"Використай <i>",
-example:"<i>Кіт</i>",
-v:(c)=>c.includes("<i>")
-},
-{
-t:"🐾 Рівень 5 — Посилання",
-instruction:"Додай посилання",
-hint:"Використай <a>",
-example:'<a href="#">Тварина</a>',
-v:(c)=>c.includes("<a")
-},
-{
-t:"🐾 Рівень 6 — Зображення",
-instruction:"Додай фото тваринки",
-hint:"Використай <img>",
-example:'<img src="cat.jpg">',
-v:(c)=>c.includes("<img")
-},
-{
-t:"🐾 Рівень 7 — Список",
-instruction:"Створи список",
-hint:"<ul> + <li>",
-example:"<ul><li>Їжа</li></ul>",
-v:(c)=>c.includes("<ul")
-},
-{
-t:"🐾 Рівень 8 — Нумерований список",
-instruction:"Створи список з цифрами",
-hint:"<ol>",
-example:"<ol><li>1</li></ol>",
-v:(c)=>c.includes("<ol")
-},
-{
-t:"🐾 Рівень 9 — Контейнер",
-instruction:"Створи блок",
-hint:"<div>",
-example:"<div>Контент</div>",
-v:(c)=>c.includes("<div")
-},
-{
-t:"🐾 Рівень 10 — Кнопка",
-instruction:"Додай кнопку",
-hint:"<button>",
-example:"<button>Натисни</button>",
-v:(c)=>c.includes("<button")
-},
-{
-t:"🐾 Рівень 11 — Форма",
-instruction:"Створи форму",
-hint:"<form>",
-example:"<form></form>",
-v:(c)=>c.includes("<form")
-}
+{t:"🐾 Заголовок",instruction:"Створи заголовок",hint:"<h1>",example:"<h1>Кіт</h1>",v:(c)=>/<h1>[\s\S]*<\/h1>/.test(c)},
+{t:"🐾 Абзац",instruction:"Додай текст",hint:"<p>",example:"<p>Текст</p>",v:(c)=>c.includes("<p>")},
+{t:"🐾 Жирний",instruction:"Жирний текст",hint:"<b>",example:"<b>Текст</b>",v:(c)=>c.includes("<b>")},
+{t:"🐾 Курсив",instruction:"Курсив",hint:"<i>",example:"<i>Текст</i>",v:(c)=>c.includes("<i>")},
+{t:"🐾 Посилання",instruction:"Посилання",hint:"<a>",example:'<a href="#">Link</a>',v:(c)=>c.includes("<a")},
+{t:"🐾 Зображення",instruction:"Фото",hint:"<img>",example:'<img src="cat.jpg">',v:(c)=>c.includes("<img")},
+{t:"🐾 Список",instruction:"Список",hint:"<ul>",example:"<ul><li></li></ul>",v:(c)=>c.includes("<ul")},
+{t:"🐾 Нумерований список",instruction:"Нумерований",hint:"<ol>",example:"<ol><li></li></ol>",v:(c)=>c.includes("<ol")},
+{t:"🐾 Контейнер",instruction:"Блок",hint:"<div>",example:"<div></div>",v:(c)=>c.includes("<div")},
+{t:"🐾 Кнопка",instruction:"Кнопка",hint:"<button>",example:"<button>OK</button>",v:(c)=>c.includes("<button")},
+{t:"🐾 Форма",instruction:"Форма",hint:"<form>",example:"<form></form>",v:(c)=>c.includes("<form")}
 ];
 
 // ===== USER =====
 let user = JSON.parse(localStorage.getItem("user")) || {
-  xp:0,
-  currentLevel:0
+ xp:0,
+ level:1,
+ currentLevel:0,
+ role:"student"
 };
 
+let achievements = JSON.parse(localStorage.getItem("achievements")) || [];
+
 function saveUser(){
-  localStorage.setItem("user", JSON.stringify(user));
+ localStorage.setItem("user", JSON.stringify(user));
+ localStorage.setItem("achievements", JSON.stringify(achievements));
+}
+
+// ===== ROLE =====
+function setRole(r){
+ user.role = r;
+ saveUser();
+}
+
+// ===== ACHIEVEMENTS =====
+function unlock(name){
+ if(!achievements.includes(name)){
+  achievements.push(name);
+  saveUser();
+  alert("🏆 " + name);
+ }
+}
+
+function showAchievements(){
+ alert("🏆:\n" + achievements.join("\n"));
 }
 
 // ===== LEVEL =====
 let currentLevel = 0;
 
 function loadLevel(i){
-  currentLevel = i;
-  user.currentLevel = i;
-  saveUser();
+ currentLevel = i;
+ user.currentLevel = i;
+ saveUser();
 
-  let task = tasks[i];
+ let task = tasks[i];
 
-  document.getElementById("levelTitle").innerText = task.t;
-  document.getElementById("instruction").innerText = task.instruction;
-  document.getElementById("hint").innerText = task.hint;
-  document.getElementById("example").innerText = task.example;
+ document.getElementById("levelTitle").innerText = task.t;
+ document.getElementById("instruction").innerText = task.instruction;
+ document.getElementById("hint").innerText = task.hint;
+ document.getElementById("example").innerText = task.example;
 
-  let saved = localStorage.getItem("code_"+i) || "";
-  document.getElementById("code").value = saved;
+ let saved = localStorage.getItem("code_"+i) || "";
+ document.getElementById("code").value = saved;
 
-  updatePreview();
+ updatePreview();
 }
 
 // ===== PREVIEW =====
 function updatePreview(){
-  let code = document.getElementById("code").value;
-  document.getElementById("codeView").innerText = code;
-  document.getElementById("preview").innerHTML = code;
+ let code = document.getElementById("code").value;
+ document.getElementById("codeView").innerText = code;
+ document.getElementById("preview").innerHTML = code;
 }
 
 // ===== CHECK =====
 function check(){
-  let code = document.getElementById("code").value;
-  let task = tasks[currentLevel];
+ let code = document.getElementById("code").value;
+ let task = tasks[currentLevel];
 
-  if(task.v(code)){
-    document.getElementById("msg").innerText = "✅ Правильно!";
+ if(task.v(code)){
+  document.getElementById("msg").innerText = "✅ Правильно!";
+  document.getElementById("successSound").play();
 
-    user.xp += 20;
-    saveUser();
+  user.xp += 20;
 
-    localStorage.setItem("code_"+currentLevel, code);
-
-    if(currentLevel < tasks.length - 1){
-      loadLevel(currentLevel + 1);
-    }
-
-  } else {
-    document.getElementById("msg").innerText = "❌ Спробуй ще";
+  if(user.xp >= 100){
+   user.level++;
+   user.xp = 0;
+   unlock("Новий рівень");
   }
+
+  saveUser();
+
+  localStorage.setItem("code_"+currentLevel, code);
+
+  unlock("Рівень " + (currentLevel+1));
+
+  if(currentLevel < tasks.length - 1){
+   loadLevel(currentLevel + 1);
+  }
+
+ } else {
+  document.getElementById("msg").innerText = "❌ Спробуй ще";
+  document.getElementById("failSound").play();
+ }
 }
 
 // ===== HINT =====
 function toggleHint(){
-  let box = document.getElementById("hintBox");
-  box.style.display = (box.style.display === "none") ? "block" : "none";
+ let box = document.getElementById("hintBox");
+ box.style.display = (box.style.display === "none") ? "block" : "none";
 }
 
 // ===== EVENTS =====
