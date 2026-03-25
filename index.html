@@ -44,22 +44,6 @@ button{
 
 .hidden{display:none;}
 
-.level-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:10px;
-}
-
-.level-btn{
-  padding:15px;
-  border-radius:10px;
-  background:#dfe6e9;
-  cursor:pointer;
-}
-
-.level-btn.locked{background:#b2bec3;}
-.level-btn.open{background:#55efc4;}
-
 .info-box{
   background:#f1f2f6;
   padding:12px;
@@ -75,23 +59,30 @@ button{
   border-left: 6px solid #00cec9;
   font-family: monospace;
   font-weight: bold;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }
 
 #explanation{
   background: linear-gradient(135deg,#ffeaa7,#fab1a0);
   border-left: 6px solid #e17055;
-  color:#2d3436;
   font-weight:bold;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
 }
-  
-pre{
+
+#codeView{
   background:#2d3436;
   color:#00ffcc;
   padding:10px;
   border-radius:10px;
   overflow-x:auto;
+  min-height:150px;
+  text-align:left;
+}
+
+#preview{
+  background:#fff;
+  padding:10px;
+  border-radius:10px;
+  min-height:150px;
+  border:1px solid #ccc;
 }
 </style>
 </head>
@@ -104,7 +95,6 @@ pre{
 
 <div class="card">
   <button onclick="showTab('game')">🎯 Гра</button>
-  <button onclick="showTab('levels')">📋 Рівні</button>
   <button onclick="showTab('profile')">👤 Профіль</button>
 </div>
 
@@ -123,130 +113,130 @@ pre{
   <button onclick="check()">Перевірити</button>
 
   <p id="msg"></p>
-  <div id="preview"></div>
 
-</div>
+  <div style="display:flex; gap:10px; margin-top:10px; flex-wrap:wrap;">
 
-<div id="levels" class="card hidden">
-  <h2>📋 Рівні</h2>
-  <div id="levelsGrid" class="level-grid"></div>
+    <div style="flex:1; min-width:300px;">
+      <h3>🧾 Код</h3>
+      <pre id="codeView"></pre>
+    </div>
+
+    <div style="flex:1; min-width:300px;">
+      <h3>👀 Результат</h3>
+      <div id="preview"></div>
+    </div>
+
+  </div>
+
 </div>
 
 <div id="profile" class="card hidden">
   <h2>👤 Профіль</h2>
   XP: <span id="xp"></span><br>
-  Рівень: <span id="levelUser"></span><br>
-  Streak: <span id="streak"></span>
+  Рівень: <span id="levelUser"></span>
 </div>
 
 </div>
 
 <script>
 
-const successSound = new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
-const errorSound = new Audio("https://actions.google.com/sounds/v1/cartoon/boing.ogg");
-
 let user = JSON.parse(localStorage.getItem("user")) || {
   xp:0,
-  level:1,
-  streak:0,
-  unlocked:1
+  level:1
 };
 
 let currentLevel = 0;
 
 function escapeHTML(str){
-  return str
-    .replace(/</g,"&lt;")
-    .replace(/>/g,"&gt;");
+  return str.replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
 
 const tasks = [
 {
 t:"Заголовок",
-instruction:"Створи заголовок за допомогою тегу h1",
-hint:"Використай <h1>",
-exp:"<h1> використовується для головного заголовка",
+instruction:"Створи заголовок",
+hint:"<h1>",
+exp:"Головний заголовок",
 example:"<h1>Мій сайт</h1>",
 v:(c)=>c.includes("<h1>")
 },
 {
 t:"Абзац",
-instruction:"Створи абзац тексту",
-hint:"Використай <p>",
-exp:"<p> використовується для тексту",
+instruction:"Створи абзац",
+hint:"<p>",
+exp:"Текст",
 example:"<p>Привіт</p>",
 v:(c)=>c.includes("<p>")
 },
 {
-t:"Жирний",
-instruction:"Зроби текст жирним",
-hint:"Тег <b>",
-exp:"Жирний текст",
+t:"Жирний текст",
+instruction:"Жирний текст",
+hint:"<b> або <strong>",
+exp:"Bold",
 example:"<b>Текст</b>",
-v:(c)=>c.includes("<b>")
+v:(c)=>c.includes("<b>") || c.includes("<strong>")
 },
 {
 t:"Курсив",
-instruction:"Зроби текст курсивом",
-hint:"Тег <i>",
-exp:"Курсив",
+instruction:"Курсив",
+hint:"<i> або <em>",
+exp:"Italic",
 example:"<i>Текст</i>",
-v:(c)=>c.includes("<i>")
+v:(c)=>c.includes("<i>") || c.includes("<em>")
 },
 {
 t:"Посилання",
 instruction:"Створи посилання",
-hint:"<a href>",
-exp:"Посилання",
+hint:"<a>",
+exp:"Link",
 example:'<a href="#">Сайт</a>',
 v:(c)=>c.includes("<a")
 },
 {
 t:"Зображення",
 instruction:"Додай зображення",
-hint:"<img src>",
-exp:"Тег для картинок",
-example:'<img src="image.jpg">',
+hint:"<img>",
+exp:"Image",
+example:'<img src="img.jpg">',
 v:(c)=>c.includes("<img")
 },
 {
 t:"Список",
 instruction:"Створи список",
-hint:"<ul> і <li>",
-exp:"Списки",
+hint:"<ul>",
+exp:"List",
 example:"<ul><li>1</li></ul>",
 v:(c)=>c.includes("<ul>")
 },
 {
 t:"Нумерований список",
-instruction:"Створи нумерований список",
+instruction:"Нумерований список",
 hint:"<ol>",
-exp:"Нумерований список",
+exp:"Ordered list",
 example:"<ol><li>1</li></ol>",
 v:(c)=>c.includes("<ol>")
 },
 {
 t:"Контейнер",
-instruction:"Створи блок",
-hint:"div",
-exp:"Контейнер",
-example:"<div>Текст</div>",
+instruction:"Блок",
+hint:"<div>",
+exp:"Container",
+example:"<div>Контент</div>",
 v:(c)=>c.includes("<div")
 },
 {
 t:"Кнопка",
-instruction:"Створи кнопку",
-hint:"button",
-exp:"Кнопка",
+instruction:"Кнопка",
+hint:"<button>",
+exp:"Button",
 example:"<button>OK</button>",
 v:(c)=>c.includes("<button")
 },
 {
 t:"Форма",
-instruction:"Створи форму",
-hint:"form",
-exp:"Форма",
+instruction:"Форма",
+hint:"<form>",
+exp:"Form",
 example:"<form></form>",
 v:(c)=>c.includes("<form")
 }
@@ -254,28 +244,21 @@ v:(c)=>c.includes("<form")
 
 function showTab(tab){
   document.getElementById("game").classList.add("hidden");
-  document.getElementById("levels").classList.add("hidden");
   document.getElementById("profile").classList.add("hidden");
   document.getElementById(tab).classList.remove("hidden");
 }
 
 function loadLevel(i){
-
-  if(i > user.unlocked){
-    alert("🔒 Заблоковано");
-    return;
-  }
-
   currentLevel = i;
   showTab('game');
 
   let t = tasks[i];
 
   document.getElementById("lessonTitle").innerText = t.t;
-  document.getElementById("instruction").innerHTML = "📌 Завдання:<br>" + t.instruction;
-  document.getElementById("hint").innerHTML = "💡 Підказка:<br>" + t.hint;
-  document.getElementById("explanation").innerHTML = "🧠 Пояснення:<br>" + t.exp;
-  document.getElementById("example").innerHTML = "🧾 Приклад:<pre>" + escapeHTML(t.example) + "</pre>";
+  document.getElementById("instruction").innerHTML = t.instruction;
+  document.getElementById("hint").innerHTML = t.hint;
+  document.getElementById("explanation").innerHTML = t.exp;
+  document.getElementById("example").innerHTML = "<pre>" + escapeHTML(t.example) + "</pre>";
 
   document.getElementById("code").value="";
 }
@@ -286,74 +269,40 @@ function check(){
   let t = tasks[currentLevel];
   let preview = document.getElementById("preview");
 
-  preview.classList.remove("correct","wrong");
-
   if(!t.v(code)){
     document.getElementById("msg").innerText="❌ Помилка";
     preview.classList.add("wrong");
-    errorSound.play();
-    user.streak = 0;
-    save();
-    updateUI();
     return;
   }
 
   document.getElementById("msg").innerText="✅ Правильно!";
+  preview.classList.remove("wrong");
   preview.classList.add("correct");
+
+  document.getElementById("codeView").innerHTML = escapeHTML(code);
   preview.innerHTML = code;
 
-  successSound.play();
-
   user.xp += 20;
-  user.streak++;
 
   if(user.xp >= 100){
     user.level++;
     user.xp = 0;
   }
 
-  if(currentLevel >= user.unlocked){
-    user.unlocked++;
-  }
-
-  save();
+  localStorage.setItem("user",JSON.stringify(user));
   updateUI();
-  renderLevels();
-}
 
-function renderLevels(){
-  let grid = document.getElementById("levelsGrid");
-  grid.innerHTML="";
-
-  tasks.forEach((t,i)=>{
-
-    let btn = document.createElement("div");
-    btn.className="level-btn";
-
-    if(i < user.unlocked){
-      btn.classList.add("open");
-    } else {
-      btn.classList.add("locked");
-    }
-
-    btn.innerText = t.t;
-    btn.onclick = ()=>loadLevel(i);
-
-    grid.appendChild(btn);
-  });
+  // автоматично наступний рівень
+  if(currentLevel < tasks.length - 1){
+    loadLevel(currentLevel + 1);
+  }
 }
 
 function updateUI(){
   document.getElementById("xp").innerText = user.xp;
   document.getElementById("levelUser").innerText = user.level;
-  document.getElementById("streak").innerText = user.streak;
 }
 
-function save(){
-  localStorage.setItem("user",JSON.stringify(user));
-}
-
-renderLevels();
 updateUI();
 loadLevel(0);
 
