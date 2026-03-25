@@ -132,7 +132,7 @@ let user = JSON.parse(localStorage.getItem("user")) || {
 
 let currentLevel = 0;
 
-const tasks = [
+constconst tasks = [
 {
 t:"Заголовок",
 instruction:"Створи заголовок за допомогою тегу h1",
@@ -172,8 +172,60 @@ hint:"<a href>",
 exp:"Посилання",
 example:'<a href="#">Сайт</a>',
 v:(c)=>c.includes("<a")
+},
+
+// ➕ ДОДАНІ РІВНІ
+
+{
+t:"Зображення",
+instruction:"Додай зображення на сторінку",
+hint:"Тег <img src>",
+exp:"<img> використовується для картинок",
+example:'<img src="image.jpg">',
+v:(c)=>c.includes("<img")
+},
+{
+t:"Список",
+instruction:"Створи список",
+hint:"<ul> і <li>",
+exp:"Списки використовуються для переліків",
+example:"<ul><li>1</li><li>2</li></ul>",
+v:(c)=>c.includes("<ul>")
+},
+{
+t:"Нумерований список",
+instruction:"Створи нумерований список",
+hint:"<ol> і <li>",
+exp:"Нумерований список має цифри",
+example:"<ol><li>1</li><li>2</li></ol>",
+v:(c)=>c.includes("<ol>")
+},
+{
+t:"Контейнер",
+instruction:"Створи блок div",
+hint:"Тег <div>",
+exp:"div використовується для структури",
+example:"<div>Контент</div>",
+v:(c)=>c.includes("<div")
+},
+{
+t:"Кнопка",
+instruction:"Створи кнопку",
+hint:"Тег <button>",
+exp:"Кнопки використовуються для дій",
+example:"<button>Натисни</button>",
+v:(c)=>c.includes("<button")
+},
+{
+t:"Форма",
+instruction:"Створи форму",
+hint:"Тег <form>",
+exp:"Форми використовуються для введення даних",
+example:"<form></form>",
+v:(c)=>c.includes("<form")
 }
 ];
+  
 
 function showTab(tab){
   document.getElementById("game").classList.add("hidden");
