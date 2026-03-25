@@ -66,30 +66,20 @@ button {
 .progress {
   height:10px;
   background:#444;
-  border-radius:5px;
-  overflow:hidden;
-  margin:10px 0;
 }
 
 .progress-bar {
   height:100%;
   width:0%;
   background:#4da3ff;
-  transition:0.3s;
-}
-
-.badge {
-  background:#4da3ff;
-  padding:5px 10px;
-  border-radius:8px;
 }
 
 #hintBox {
   display:none;
-  background:#333;
+  background:#dff6ff;
+  color:#000;
   padding:10px;
   border-radius:8px;
-  margin-top:10px;
 }
 
 .success {
@@ -101,41 +91,17 @@ button {
   50% { transform:scale(1.1); }
   100% { transform:scale(1); }
 }
-  body {
-  font-size:20px;
-  line-height:1.6;
+
+pre {
+  background:#111;
+  color:#0f0;
+  padding:10px;
+  height:200px;
+  overflow:auto;
 }
 
-button {
-  font-size:20px;
-  padding:14px;
-  border-radius:12px;
-}
-
-h2, h3 {
-  text-align:center;
-}
-
-#instruction {
-  font-size:22px;
-  font-weight:bold;
-}
-
-#msg {
-  font-size:22px;
-  text-align:center;
-}
-
-#hintBox {
-  background:#dff6ff;
-  color:#000;
-}
-
-#preview {
+body {
   font-size:18px;
-  background:#fff;
-  border-radius:10px;
-  padding:15px;
 }
 </style>
 </head>
@@ -159,7 +125,7 @@ h2, h3 {
   <div class="panel left">
     <h2 id="levelTitle"></h2>
 
-    <p><b>📌 Завдання:</b> <span id="instruction"></span></p>
+    <p id="instruction"></p>
 
     <button onclick="toggleHint()">💡 Підказка</button>
 
@@ -167,7 +133,8 @@ h2, h3 {
       <p id="hint"></p>
     </div>
 
-    <p><b>🧪 Приклад:</b> <code id="example"></code></p>
+    <p><b>Приклад:</b></p>
+    <code id="example"></code>
 
     <textarea id="code"></textarea>
 
@@ -200,178 +167,123 @@ let user = JSON.parse(localStorage.getItem("user")) || {
 
 // ===== PARSER =====
 function parseHTML(code){
-  let parser = new DOMParser();
-  return parser.parseFromString(code,"text/html").body;
+ let parser = new DOMParser();
+ return parser.parseFromString(code,"text/html").body;
 }
 
-// ===== TASKS =====
-const tasks = [
+// ===== HISTORY CODE VIEW =====
+function updateCodeView(){
+ let allCode = "";
 
+ for(let i = 0; i <= user.currentLevel; i++){
+  let saved = localStorage.getItem("code_"+i);
+  if(saved){
+   allCode += `--- Рівень ${i+1} ---\n${saved}\n\n`;
+  }
+ }
+
+ let current = document.getElementById("code").value;
+
+ allCode += "--- Поточний ---\n" + current;
+
+ document.getElementById("codeView").innerText = allCode;
+}
+
+// ===== TASKS (12 рівнів) =====
+const tasks = [
 {
  t:"🐱 Рівень 1",
  instruction:"Зроби великий заголовок 🐾",
- hint:"Використай <h1>",
+ hint:"<h1>",
  example:"<h1>Кіт</h1>",
- check:(doc)=>{
-  let el = doc.querySelector("h1");
-  return {ok: el && el.textContent.trim().length>0, errors: !el?["❌ Додай <h1>"]:[]}
- }
+ check:(doc)=>({ok: doc.querySelector("h1"), errors:[]})
 },
-
 {
  t:"🐶 Рівень 2",
- instruction:"Напиши текст про тваринку 🐾",
- hint:"Використай <p>",
- example:"<p>Я люблю котів</p>",
- check:(doc)=>{
-  let el = doc.querySelector("p");
-  return {ok: el && el.textContent.trim().length>0, errors: !el?["❌ Додай <p>"]:[]}
- }
+ instruction:"Напиши текст 🐾",
+ hint:"<p>",
+ example:"<p>Текст</p>",
+ check:(doc)=>({ok: doc.querySelector("p"), errors:[]})
 },
-
 {
  t:"🐱 Рівень 3",
- instruction:"Зроби жирний текст 🐾",
- hint:"Використай <b>",
+ instruction:"Жирний текст 🐾",
+ hint:"<b>",
  example:"<b>Кіт</b>",
- check:(doc)=>{
-  return {ok: doc.querySelector("b"), errors: doc.querySelector("b")?[]:["❌ Додай <b>"]}
- }
+ check:(doc)=>({ok: doc.querySelector("b"), errors:[]})
 },
-
 {
  t:"🐶 Рівень 4",
- instruction:"Зроби курсив 🐾",
- hint:"Використай <i>",
+ instruction:"Курсив 🐾",
+ hint:"<i>",
  example:"<i>Кіт</i>",
- check:(doc)=>{
-  return {ok: doc.querySelector("i"), errors: doc.querySelector("i")?[]:["❌ Додай <i>"]}
- }
+ check:(doc)=>({ok: doc.querySelector("i"), errors:[]})
 },
-
 {
  t:"🐱 Рівень 5",
- instruction:"Додай посилання 🔗",
- hint:"Використай <a href>",
- example:'<a href="https://example.com">Тут</a>',
- check:(doc)=>{
-  let el = doc.querySelector("a");
-  return {ok: el && el.hasAttribute("href"), errors: !el?["❌ Додай <a>"]:[]}
- }
+ instruction:"Посилання 🔗",
+ hint:"<a href>",
+ example:'<a href="#">link</a>',
+ check:(doc)=>({ok: doc.querySelector("a"), errors:[]})
 },
-
 {
  t:"🐶 Рівень 6",
- instruction:"Додай картинку 🖼️",
- hint:"Використай <img>",
- example:`<img src="https://tse1.mm.bing.net/th/id/OIP.jgFz2YP5SildCutyqDuFTQHaFR?rs=1&pid=ImgDetMain&o=7&rm=3">`,
- check:(doc)=>{
-  let el = doc.querySelector("img");
-  return {
-    ok: el && el.hasAttribute("src"),
-    errors: !el ? ["❌ Додай <img>"] : []
-  }
- }
+ instruction:"Картинка 🖼️",
+ hint:"<img>",
+ example:'<img src="...">',
+ check:(doc)=>({ok: doc.querySelector("img"), errors:[]})
 },
-
 {
  t:"🐱 Рівень 7",
- instruction:"Зроби список улюблених речей 📝",
- hint:"<ul> + <li>",
- example:`
-<ul>
-  <li>🐟 рибка</li>
-  <li>🛏️ спати</li>
-  <li>🎾 гратися</li>
-</ul>
-`,
- check:(doc)=>{
-  let ul = doc.querySelector("ul");
-  let li = doc.querySelector("li");
-  return {
-    ok: ul && li,
-    errors: !ul ? ["❌ Додай <ul>"] : (!li ? ["❌ Додай <li>"] : [])
-  }
- }
+ instruction:"Список 📝",
+ hint:"<ul><li>",
+ example:`<ul><li>1</li></ul>`,
+ check:(doc)=>({ok: doc.querySelector("ul") && doc.querySelector("li"), errors:[]})
 },
-
 {
  t:"🐶 Рівень 8",
- instruction:"Зроби нумерований список 🔢",
- hint:"<ol> + <li>",
- example:`
-<ol>
-  <li>Прокинутись 😴</li>
-  <li>Погратися 🧸</li>
-  <li>Поїсти 🍖</li>
-</ol>
-`,
- check:(doc)=>{
-  let ol = doc.querySelector("ol");
-  let li = doc.querySelector("li");
-  return {
-    ok: ol && li,
-    errors: !ol ? ["❌ Додай <ol>"] : (!li ? ["❌ Додай <li>"] : [])
-  }
- }
+ instruction:"Нумерований список 🔢",
+ hint:"<ol>",
+ example:`<ol><li>1</li></ol>`,
+ check:(doc)=>({ok: doc.querySelector("ol") && doc.querySelector("li"), errors:[]})
 },
-
 {
  t:"🐱 Рівень 9",
- instruction:"Створи блок 🧱",
+ instruction:"Блок 🧱",
  hint:"<div>",
- example:"<div>Кіт</div>",
- check:(doc)=>{
-  return {ok: doc.querySelector("div"), errors: doc.querySelector("div")?[]:["❌ Додай <div>"]}
- }
+ example:"<div></div>",
+ check:(doc)=>({ok: doc.querySelector("div"), errors:[]})
 },
-
 {
  t:"🐶 Рівень 10",
- instruction:"Додай кнопку 🔘",
+ instruction:"Кнопка 🔘",
  hint:"<button>",
  example:"<button>OK</button>",
- check:(doc)=>{
-  let el = doc.querySelector("button");
-  return {ok: el && el.textContent.trim(), errors: !el?["❌ Додай <button>"]:[]}
- }
+ check:(doc)=>({ok: doc.querySelector("button"), errors:[]})
 },
-
 {
  t:"🐱 Рівень 11",
- instruction:"Створи форму 📝",
+ instruction:"Форма 📝",
  hint:"<form>",
  example:"<form></form>",
- check:(doc)=>{
-  return {ok: doc.querySelector("form"), errors: doc.querySelector("form")?[]:["❌ Додай <form>"]}
- }
+ check:(doc)=>({ok: doc.querySelector("form"), errors:[]})
 },
-
-// ✅ ФІНАЛ
 {
  t:"🏆 Рівень 12",
- instruction:"Фінал! Покажи результат 🎉",
- hint:"Наприклад: <h1>Я молодець!</h1>",
- example:"<h1>Я молодець!</h1>",
- check:(doc)=>{
-  let el = doc.querySelector("h1");
-  return {
-    ok: el && el.textContent.trim().length > 0,
-    errors: !el ? ["❌ Додай фінальний результат <h1>"] : []
-  }
- }
+ instruction:"Фінал 🎉",
+ hint:"<h1>",
+ example:"<h1>Я молодець</h1>",
+ check:(doc)=>({ok: doc.querySelector("h1"), errors:[]})
 }
-
 ];
-
 
 // ===== UI =====
 function updateUI(){
- document.getElementById("xp").innerText = user.xp;
- document.getElementById("streak").innerText = user.streak;
-
  let progress = (user.currentLevel / tasks.length)*100;
  document.getElementById("progressBar").style.width = progress + "%";
+
+ document.getElementById("xp").innerText = user.xp;
+ document.getElementById("streak").innerText = user.streak;
 }
 
 // ===== LEVEL =====
@@ -385,8 +297,7 @@ function loadLevel(i){
  document.getElementById("hint").innerText = t.hint;
  document.getElementById("example").innerText = t.example;
 
- let saved = localStorage.getItem("code_"+i) || "";
- document.getElementById("code").value = saved;
+ document.getElementById("code").value = localStorage.getItem("code_"+i) || "";
 
  updatePreview();
  updateUI();
@@ -395,8 +306,9 @@ function loadLevel(i){
 // ===== PREVIEW =====
 function updatePreview(){
  let code = document.getElementById("code").value;
- document.getElementById("codeView").innerText = code;
  document.getElementById("preview").innerHTML = code;
+
+ updateCodeView();
 }
 
 // ===== CHECK =====
@@ -409,20 +321,20 @@ function check(){
 
  if(result.ok){
   document.getElementById("msg").innerText = "✅ Правильно!";
-  document.getElementById("msg").classList.add("success");
   document.getElementById("successSound").play();
 
   user.xp += 20;
   user.streak += 1;
 
   localStorage.setItem("code_"+user.currentLevel, code);
+  updateCodeView();
 
   if(user.currentLevel < tasks.length-1){
    loadLevel(user.currentLevel+1);
   }
 
  } else {
-  document.getElementById("msg").innerText = result.errors.join(" | ");
+  document.getElementById("msg").innerText = "❌ Спробуй ще";
   document.getElementById("failSound").play();
  }
 
