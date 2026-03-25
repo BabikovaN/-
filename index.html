@@ -170,6 +170,11 @@ function escapeHTML(str){
   return str.replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
 
+// ✅ гарантія тексту
+function safeText(value){
+  return value ? value : "—";
+}
+
 const tasks = [
 {
 t:"Заголовок",
@@ -258,24 +263,7 @@ hint:"<form>",
 exp:"Form",
 example:"<form></form>",
 v:(c)=>c.includes("<form")
-},
-
-// ✅ НОВИЙ РІВЕНЬ
-{
-t:"Моя тваринка 🐾",
-instruction:"Створи сторінку про свою тваринку (заголовок, текст і список)",
-hint:"Використай <h1>, <p>, <ul>, <li>, <img>",
-exp:"Сторінка повинна містити назву тваринки, опис і список характеристик",
-example:`<h1>Мій кіт Мурчик</h1>
-<p>Мурчик дуже грайливий.</p>
-<ul>
-  <li>Вік: 3 роки</li>
-  <li>Любить: їсти</li>
-</ul>
-<img src="cat.jpg">`,
-v:(c)=>c.includes("<h1>") && c.includes("<p>") && c.includes("<ul")
 }
-
 ];
 
 function showTab(tab){
@@ -290,11 +278,13 @@ function loadLevel(i){
 
   let t = tasks[i];
 
-  document.getElementById("lessonTitle").innerText = t.t;
-  document.getElementById("instruction").innerText = t.instruction;
-  document.getElementById("hint").innerText = t.hint;
-  document.getElementById("explanation").innerText = t.exp;
-  document.getElementById("example").textContent = t.example;
+  document.getElementById("lessonTitle").innerText = safeText(t.t);
+
+  // ✅ ВІДОБРАЖЕННЯ ВСІХ БЛОКІВ
+  document.getElementById("instruction").innerText = "📌 " + safeText(t.instruction);
+  document.getElementById("hint").innerText = "💡 " + safeText(t.hint);
+  document.getElementById("explanation").innerText = safeText(t.exp);
+  document.getElementById("example").textContent = t.example || "";
 
   document.getElementById("code").value = savedCode[i] || "";
 
