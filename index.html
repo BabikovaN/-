@@ -1,1 +1,207 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<title>Малий веб-розробник</title>
 
+<style>
+body { font-family: sans-serif; text-align: center; margin: 20px; }
+button { padding: 10px 20px; margin: 10px; font-size: 18px; }
+#gameArea { margin-top: 20px; }
+#output { margin-top: 20px; border: 1px solid #ccc; padding: 10px; min-height: 150px; }
+input, textarea { font-size: 16px; padding: 5px; margin: 5px; }
+img { max-width: 200px; margin: 10px; }
+#movingBox { width:50px; height:50px; background:red; position:relative; margin:10px auto;}
+.example { font-family: monospace; background:#f0f0f0; padding:5px; margin:5px; display:inline-block;}
+</style>
+
+</head>
+<body>
+
+<h1>🎮 Гра: Малий веб-розробник</h1>
+<p>Навчися створювати власний сайт про улюблену тварину!</p>
+
+<div id="gameArea"></div>
+<div id="output"></div>
+
+<script>
+
+let level = 1;
+let output = document.getElementById("output");
+let gameArea = document.getElementById("gameArea");
+
+function loadLevel() {
+  gameArea.innerHTML = "";
+  output.innerHTML = "";
+
+  switch(level){
+
+    case 1:
+      gameArea.innerHTML = `
+        <h2>Рівень 1: Зроби кнопку червоною 🔴</h2>
+        <button onclick="setColor('red')">🔴 Червоний</button>
+        <button onclick="setColor('blue')">🔵 Синій</button>
+        <button onclick="setColor('green')">🟢 Зелений</button>
+        <br><button id="gameBtn">Кнопка</button>
+      `;
+      break;
+
+    case 2:
+      gameArea.innerHTML = `
+        <h2>Рівень 2: Створи заголовок</h2>
+        <input type="text" id="titleInput" placeholder="Введи заголовок">
+        <button onclick="setTitle()">Створити</button>
+      `;
+      break;
+
+    case 3:
+      gameArea.innerHTML = `
+        <h2>Рівень 3: Додай опис</h2>
+        <textarea id="textInput"></textarea><br>
+        <button onclick="setParagraph()">Додати</button>
+      `;
+      break;
+
+    case 4:
+      gameArea.innerHTML = `
+        <h2>Рівень 4: Додай картинку</h2>
+        <input type="text" id="imgInput" placeholder="URL картинки">
+        <button onclick="setImage()">Додати</button>
+      `;
+      break;
+
+    case 5:
+      gameArea.innerHTML = `
+        <h2>Рівень 5: Список</h2>
+        <input type="text" id="listInput" placeholder="через кому">
+        <button onclick="setList()">Додати</button>
+      `;
+      break;
+
+    case 6:
+      gameArea.innerHTML = `
+        <h2>Рівень 6: Зміна кольору тексту</h2>
+        <p id="text">Мій кіт</p>
+        <button onclick="changeTextColor()">Змінити</button>
+      `;
+      break;
+
+    case 7:
+      gameArea.innerHTML = `
+        <h2>Рівень 7: Зміна тексту</h2>
+        <p id="text2">Привіт</p>
+        <button onclick="changeTextContent()">Натисни</button>
+      `;
+      break;
+
+    case 8:
+      gameArea.innerHTML = `
+        <h2>Рівень 8: Додати абзац</h2>
+        <button onclick="addParagraph()">Додати</button>
+      `;
+      break;
+
+    case 9:
+      gameArea.innerHTML = `
+        <h2>Рівень 9: Зміна фону</h2>
+        <img src="https://placekitten.com/200/200" onclick="changeBg()">
+      `;
+      break;
+
+    case 10:
+      gameArea.innerHTML = `
+        <h2>Рівень 10: Рух</h2>
+        <div id="movingBox"></div>
+        <button onclick="moveBox()">Рухати</button>
+      `;
+      break;
+
+    case 11:
+      gameArea.innerHTML = `
+        <h2>Фінал 🎉</h2>
+        <textarea id="finalSite" rows="10" cols="50"></textarea><br>
+        <button onclick="showFinalSite()">Показати</button>
+      `;
+      break;
+  }
+}
+
+// функції
+function setColor(color){
+  let btn=document.getElementById("gameBtn");
+  btn.style.backgroundColor=color;
+  if(color==='red'){ next(); }
+}
+
+function setTitle(){
+  let val=document.getElementById("titleInput").value;
+  if(val.trim()!==""){ output.innerHTML="<h1>"+val+"</h1>"; next(); }
+}
+
+function setParagraph(){
+  let val=document.getElementById("textInput").value;
+  if(val.trim()!==""){ output.innerHTML="<p>"+val+"</p>"; next(); }
+}
+
+function setImage(){
+  let url=document.getElementById("imgInput").value;
+  if(url.trim()!==""){ output.innerHTML="<img src='"+url+"'>"; next(); }
+}
+
+function setList(){
+  let val=document.getElementById("listInput").value;
+  if(val.trim()!==""){
+    let items=val.split(",");
+    let html="<ul>";
+    items.forEach(i=> html+="<li>"+i+"</li>");
+    html+="</ul>";
+    output.innerHTML=html;
+    next();
+  }
+}
+
+function changeTextColor(){
+  document.getElementById('text').style.color='red';
+}
+
+function changeTextContent(){
+  document.getElementById('text2').innerText="🎉";
+  next();
+}
+
+function addParagraph(){
+  output.innerHTML += "<p>Новий абзац</p>";
+  next();
+}
+
+function changeBg(){
+  document.body.style.backgroundColor='lightblue';
+}
+
+function moveBox(){
+  let box=document.getElementById("movingBox");
+  let pos=0;
+  let i=setInterval(()=>{
+    if(pos>=200) clearInterval(i);
+    pos+=5;
+    box.style.left=pos+'px';
+  },50);
+}
+
+function showFinalSite(){
+  let html=document.getElementById("finalSite").value;
+  output.innerHTML=html;
+}
+
+function next(){
+  output.innerHTML+="<p>🎉 Молодець!</p>";
+  level++;
+  setTimeout(loadLevel,1000);
+}
+
+loadLevel();
+
+</script>
+
+</body>
+</html>
