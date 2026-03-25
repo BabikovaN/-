@@ -2,340 +2,258 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HTML Навчання PRO+</title>
+<title>HTML Pet Trainer 🐾</title>
 
 <style>
-body{
+body {
   font-family: Arial;
-  margin:0;
-  background: linear-gradient(135deg,#74b9ff,#a29bfe);
-  text-align:center;
+  background:#f4f6f9;
+  margin:20px;
 }
 
-h1{color:white}
-
-.container{max-width:900px;margin:auto;padding:10px;}
-
-.card{
-  background:white;
-  padding:20px;
-  margin:15px;
-  border-radius:15px;
-}
-
-textarea{
-  width:95%;
-  max-width:600px;
-  padding:10px;
-  font-family: monospace;
-}
-
-button{
-  padding:10px 15px;
-  border:none;
-  border-radius:8px;
-  background:#4da3ff;
-  color:white;
-}
-
-.correct{border:3px solid green;}
-.wrong{border:3px solid red;}
-
-.hidden{display:none;}
-
-.info-box{
-  background:#ffffff;
-  padding:12px;
-  margin-top:10px;
-  border-radius:10px;
-  text-align:left;
-  line-height:1.5;
-  color:#000;
-  border:1px solid #ddd;
-}
-
-/* 🔥 ДОДАНО ВІДОБРАЖЕННЯ */
-#instruction{
-  font-size:18px;
-  font-weight:bold;
-}
-
-#hint{
-  color:#0984e3;
-}
-
-#example{
-  background:#2d3436;
-  color:#00ffcc;
-  padding:10px;
-  border-radius:8px;
-  display:block;
-  margin-top:5px;
-  overflow:auto;
-}
-
-#explanation{
-  background:#ffeaa7;
-  border-left:6px solid #e17055;
-  font-weight:bold;
-}
-
-#codeView{
-  background:#2d3436;
-  color:#00ffcc;
-  padding:10px;
-  border-radius:10px;
-  min-height:150px;
-  text-align:left;
-  overflow:auto;
-}
-
-#preview{
+.card {
   background:#fff;
   padding:15px;
+  border-radius:12px;
+  margin-bottom:15px;
+  box-shadow:0 8px 20px rgba(0,0,0,0.1);
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from {opacity:0; transform:translateY(10px);}
+  to {opacity:1; transform:translateY(0);}
+}
+
+textarea {
+  width:100%;
+  height:150px;
+  margin-top:10px;
+}
+
+#editorLayout {
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+#editorLayout > div {
+  flex:1;
+  min-width:300px;
+  background:#fff;
+  padding:10px;
   border-radius:10px;
-  min-height:150px;
-  border:2px solid #ccc;
-  text-align:left;
-  color:#000;
 }
 
-
-  #game, #profile {
-  color:#000;
+button {
+  padding:10px 15px;
+  margin-top:10px;
+  cursor:pointer;
+  transition:0.2s;
 }
 
-.info-box b {
-  display:block;
-  margin-bottom:5px;
+button:hover {
+  transform:scale(1.05);
+}
+
+#hintBox {
+  display:none;
+  background:#eef;
+  padding:10px;
+  border-radius:8px;
+  margin-top:10px;
 }
 </style>
 </head>
 
 <body>
 
-<h1>🎮 HTML Навчання PRO+</h1>
-
-<div class="container">
-
 <div class="card">
-  <button onclick="showTab('game')">🎯 Гра</button>
-  <button onclick="showTab('profile')">👤 Профіль</button>
-</div>
+  <h2 id="levelTitle"></h2>
 
-<div id="game" class="card">
+  <p><b>📌 Завдання:</b> <span id="instruction"></span></p>
 
-  <h2 id="lessonTitle"></h2>
+  <button onclick="toggleHint()">💡 Показати підказку</button>
 
-  <div class="info-box">
-    <b>📌 Завдання:</b>
-    <div id="instruction"></div>
+  <div id="hintBox">
+    <p><b>💡 Підказка:</b> <span id="hint"></span></p>
   </div>
 
-  <div class="info-box">
-    <b>💡 Підказка:</b>
-    <div id="hint"></div>
-  </div>
-
-  <div id="explanation" class="info-box"></div>
-
-  <div class="info-box">
-    <b>🧪 Приклад:</b>
-    <pre id="example"></pre>
-  </div>
+  <p><b>🧪 Приклад:</b> <code id="example"></code></p>
 
   <textarea id="code"></textarea>
 
-  <br>
   <button onclick="check()">Перевірити</button>
 
   <p id="msg"></p>
 
-  <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:10px;">
-
-    <div style="flex:1; min-width:300px;">
+  <div id="editorLayout">
+    <div>
       <h3>🧾 Код</h3>
       <pre id="codeView"></pre>
     </div>
 
-    <div style="flex:1; min-width:300px;">
+    <div>
       <h3>👀 Результат</h3>
       <div id="preview"></div>
     </div>
-
   </div>
-
-</div>
-
-<div id="profile" class="card hidden">
-  XP: <span id="xp"></span><br>
-  Рівень: <span id="levelUser"></span>
-</div>
-
 </div>
 
 <script>
 
-let user = JSON.parse(localStorage.getItem("user")) || {
-  xp:0,
-  level:1
-};
-
-let savedCode = JSON.parse(localStorage.getItem("savedCode")) || {};
-
-let currentLevel = 0;
-
-function escapeHTML(str){
-  return str.replace(/</g,"&lt;").replace(/>/g,"&gt;");
-}
-
-// ✅ гарантія що текст не пустий
-function safeText(v){
-  return v && v.trim() !== "" ? v : "—";
-}
-
-
+// ===== LEVELS =====
 const tasks = [
 {
-t:"Рівень 1 — Заголовок 🐾",
-instruction:"Створи заголовок сторінки про тварину (наприклад свого кота або собаку)",
-hint:"Використай тег <h1> і напиши текст всередині",
-exp:"Заголовок — це великий текст зверху сторінки",
+t:"🐾 Рівень 1 — Заголовок",
+instruction:"Створи заголовок про свою тваринку",
+hint:"Використай <h1>",
 example:"<h1>Мій кіт</h1>",
-v:(c)=>c.includes("<h1>")
+v:(c)=>/<h1>[\s\S]*<\/h1>/.test(c)
 },
 {
-t:"Рівень 2 — Абзац 🐾",
-instruction:"Додай опис тварини у вигляді абзацу",
-hint:"Використай тег <p>",
-exp:"Абзац використовується для звичайного тексту",
-example:"<p>Мій кіт дуже грайливий</p>",
+t:"🐾 Рівень 2 — Абзац",
+instruction:"Додай опис тваринки",
+hint:"Використай <p>",
+example:"<p>Мій кіт милий</p>",
 v:(c)=>c.includes("<p>")
 },
 {
-t:"Рівень 3 — Жирний текст 🐾",
+t:"🐾 Рівень 3 — Жирний текст",
 instruction:"Зроби частину тексту жирною",
-hint:"Використай тег <b>",
-exp:"Жирний текст виділяє важливе",
-example:"<b>Мій кіт</b>",
+hint:"Використай <b>",
+example:"<b>Кіт</b>",
 v:(c)=>c.includes("<b>")
 },
 {
-t:"Рівень 4 — Курсив 🐾",
+t:"🐾 Рівень 4 — Курсив",
 instruction:"Зроби текст курсивом",
-hint:"Використай тег <i>",
-exp:"Курсив робить текст нахиленим",
-example:"<i>Мій кіт</i>",
+hint:"Використай <i>",
+example:"<i>Кіт</i>",
 v:(c)=>c.includes("<i>")
 },
 {
-t:"Рівень 5 — Посилання 🐾",
-instruction:"Створи посилання",
-hint:"Використай тег <a>",
-exp:"Посилання веде на іншу сторінку",
-example:'<a href="#">Сторінка</a>',
+t:"🐾 Рівень 5 — Посилання",
+instruction:"Додай посилання",
+hint:"Використай <a>",
+example:'<a href="#">Тварина</a>',
 v:(c)=>c.includes("<a")
 },
 {
-t:"Рівень 6 — Зображення 🐾",
-instruction:"Додай фото тварини",
-hint:"Використай тег <img>",
-exp:"Зображення показує картинку",
+t:"🐾 Рівень 6 — Зображення",
+instruction:"Додай фото тваринки",
+hint:"Використай <img>",
 example:'<img src="cat.jpg">',
 v:(c)=>c.includes("<img")
 },
 {
-t:"Рівень 7 — Список 🐾",
+t:"🐾 Рівень 7 — Список",
 instruction:"Створи список",
-hint:"Використай <ul> і <li>",
-exp:"Список — це перелік елементів",
-example:"<ul><li>Корм</li></ul>",
+hint:"<ul> + <li>",
+example:"<ul><li>Їжа</li></ul>",
 v:(c)=>c.includes("<ul")
 },
 {
-t:"Рівень 8 — Нумерований список 🐾",
-instruction:"Створи нумерований список",
-hint:"Використай <ol>",
-exp:"Список з цифрами",
+t:"🐾 Рівень 8 — Нумерований список",
+instruction:"Створи список з цифрами",
+hint:"<ol>",
 example:"<ol><li>1</li></ol>",
 v:(c)=>c.includes("<ol")
 },
 {
-t:"Рівень 9 — Контейнер 🐾",
-instruction:"Створи блок сторінки",
-hint:"Використай <div>",
-exp:"Контейнер групує елементи",
+t:"🐾 Рівень 9 — Контейнер",
+instruction:"Створи блок",
+hint:"<div>",
 example:"<div>Контент</div>",
 v:(c)=>c.includes("<div")
 },
 {
-t:"Рівень 10 — Кнопка 🐾",
+t:"🐾 Рівень 10 — Кнопка",
 instruction:"Додай кнопку",
-hint:"Використай <button>",
-exp:"Кнопка виконує дію",
+hint:"<button>",
 example:"<button>Натисни</button>",
 v:(c)=>c.includes("<button")
 },
 {
-t:"Рівень 11 — Форма 🐾",
+t:"🐾 Рівень 11 — Форма",
 instruction:"Створи форму",
-hint:"Використай <form>",
-exp:"Форма для введення даних",
+hint:"<form>",
 example:"<form></form>",
 v:(c)=>c.includes("<form")
 }
 ];
 
-function showTab(tab){
-  document.getElementById("game").classList.remove("hidden");
-  document.getElementById("profile").classList.add("hidden");
+// ===== USER =====
+let user = JSON.parse(localStorage.getItem("user")) || {
+  xp:0,
+  currentLevel:0
+};
+
+function saveUser(){
+  localStorage.setItem("user", JSON.stringify(user));
 }
+
+// ===== LEVEL =====
+let currentLevel = 0;
 
 function loadLevel(i){
   currentLevel = i;
+  user.currentLevel = i;
+  saveUser();
 
-  let t = tasks[i];
+  let task = tasks[i];
 
-  document.getElementById("lessonTitle").innerText = safeText(t.t);
-  document.getElementById("instruction").innerText = "📌 " + safeText(t.instruction);
-  document.getElementById("hint").innerText = "💡 " + safeText(t.hint);
-  document.getElementById("explanation").innerText = "📘 " + safeText(t.exp);
-  document.getElementById("example").innerHTML = safeText(t.example);
+  document.getElementById("levelTitle").innerText = task.t;
+  document.getElementById("instruction").innerText = task.instruction;
+  document.getElementById("hint").innerText = task.hint;
+  document.getElementById("example").innerText = task.example;
 
-  document.getElementById("code").value = savedCode[i] || "";
+  let saved = localStorage.getItem("code_"+i) || "";
+  document.getElementById("code").value = saved;
+
+  updatePreview();
 }
 
-function check(){
-
+// ===== PREVIEW =====
+function updatePreview(){
   let code = document.getElementById("code").value;
-  let t = tasks[currentLevel];
-  let preview = document.getElementById("preview");
+  document.getElementById("codeView").innerText = code;
+  document.getElementById("preview").innerHTML = code;
+}
 
-  if(!t.v(code)){
-    document.getElementById("msg").innerText="❌ Помилка";
-    preview.classList.add("wrong");
-    return;
-  }
+// ===== CHECK =====
+function check(){
+  let code = document.getElementById("code").value;
+  let task = tasks[currentLevel];
 
-  document.getElementById("msg").innerText="✅ Правильно!";
-  preview.classList.remove("wrong");
-  preview.classList.add("correct");
+  if(task.v(code)){
+    document.getElementById("msg").innerText = "✅ Правильно!";
 
-  document.getElementById("codeView").innerHTML = escapeHTML(code);
-  preview.innerHTML = code;
+    user.xp += 20;
+    saveUser();
 
-  savedCode[currentLevel] = code;
-  localStorage.setItem("savedCode", JSON.stringify(savedCode));
+    localStorage.setItem("code_"+currentLevel, code);
 
-  user.xp += 20;
+    if(currentLevel < tasks.length - 1){
+      loadLevel(currentLevel + 1);
+    }
 
-  if(currentLevel < tasks.length - 1){
-    setTimeout(()=>loadLevel(currentLevel + 1), 800);
+  } else {
+    document.getElementById("msg").innerText = "❌ Спробуй ще";
   }
 }
 
-loadLevel(0);
+// ===== HINT =====
+function toggleHint(){
+  let box = document.getElementById("hintBox");
+  box.style.display = (box.style.display === "none") ? "block" : "none";
+}
+
+// ===== EVENTS =====
+document.getElementById("code").addEventListener("input", updatePreview);
+
+// ===== INIT =====
+loadLevel(user.currentLevel || 0);
 
 </script>
 
