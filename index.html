@@ -101,8 +101,14 @@ button{
   color:#000;
 }
 
-#preview *{
+
+  #game, #profile {
   color:#000;
+}
+
+.info-box b {
+  display:block;
+  margin-bottom:5px;
 }
 </style>
 </head>
@@ -294,8 +300,8 @@ function loadLevel(i){
   document.getElementById("lessonTitle").innerText = safeText(t.t);
   document.getElementById("instruction").innerText = "📌 " + safeText(t.instruction);
   document.getElementById("hint").innerText = "💡 " + safeText(t.hint);
-  document.getElementById("explanation").innerText = safeText(t.exp);
-  document.getElementById("example").textContent = safeText(t.example);
+  document.getElementById("explanation").innerText = "📘 " + safeText(t.exp);
+  document.getElementById("example").innerHTML = safeText(t.example);
 
   document.getElementById("code").value = savedCode[i] || "";
 }
