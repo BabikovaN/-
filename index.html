@@ -15,10 +15,6 @@ body{
 
 h1{color:white}
 
-.nav button{
-  margin:5px;
-}
-
 .container{max-width:800px;margin:auto;padding:10px;}
 
 .card{
@@ -61,21 +57,15 @@ button{
   cursor:pointer;
 }
 
-.level-btn.locked{
-  background:#b2bec3;
-  cursor:not-allowed;
-}
+.level-btn.locked{background:#b2bec3;}
+.level-btn.open{background:#55efc4;}
 
-.level-btn.open{
-  background:#55efc4;
-}
-
-.badge{
-  display:inline-block;
-  padding:5px 10px;
-  background:gold;
-  margin:5px;
+.info-box{
+  background:#f1f2f6;
+  padding:10px;
+  margin-top:10px;
   border-radius:10px;
+  text-align:left;
 }
 </style>
 </head>
@@ -84,19 +74,23 @@ button{
 
 <h1>🎮 HTML Навчання PRO+</h1>
 
-<div class="nav">
+<div class="container">
+
+<div class="card">
   <button onclick="showTab('game')">🎯 Гра</button>
   <button onclick="showTab('levels')">📋 Рівні</button>
   <button onclick="showTab('profile')">👤 Профіль</button>
 </div>
 
-<div class="container">
-
 <!-- GAME -->
 <div id="game" class="card">
 
   <h2 id="lessonTitle"></h2>
-  <div id="example"></div>
+
+  <div id="instruction" class="info-box"></div>
+  <div id="hint" class="info-box"></div>
+  <div id="explanation" class="info-box"></div>
+  <div id="example" class="info-box"></div>
 
   <textarea id="code"></textarea>
 
@@ -104,26 +98,22 @@ button{
   <button onclick="check()">Перевірити</button>
 
   <p id="msg"></p>
-
   <div id="preview"></div>
 
 </div>
 
 <!-- LEVELS -->
 <div id="levels" class="card hidden">
-  <h2>📋 Вибір рівнів</h2>
+  <h2>📋 Рівні</h2>
   <div id="levelsGrid" class="level-grid"></div>
 </div>
 
 <!-- PROFILE -->
 <div id="profile" class="card hidden">
   <h2>👤 Профіль</h2>
-  <p>XP: <span id="xp"></span></p>
-  <p>Рівень: <span id="levelUser"></span></p>
-  <p>Streak: <span id="streak"></span></p>
-
-  <h3>🏅 Бейджі:</h3>
-  <div id="badges"></div>
+  XP: <span id="xp"></span><br>
+  Рівень: <span id="levelUser"></span><br>
+  Streak: <span id="streak"></span>
 </div>
 
 </div>
@@ -143,30 +133,59 @@ let user = JSON.parse(localStorage.getItem("user")) || {
 let currentLevel = 0;
 
 const tasks = [
-{t:"Заголовок",e:"<h1>Text</h1>",v:(c)=>c.includes("<h1>")},
-{t:"Абзац",e:"<p>Text</p>",v:(c)=>c.includes("<p>")},
-{t:"Жирний",e:"<b>Text</b>",v:(c)=>c.includes("<b>")},
-{t:"Курсив",e:"<i>Text</i>",v:(c)=>c.includes("<i>")},
-{t:"Посилання",e:'<a href="#">Link</a>',v:(c)=>c.includes("<a")},
-{t:"Зображення",e:'<img src="img.jpg">',v:(c)=>c.includes("<img")},
-{t:"Список",e:"<ul><li>1</li></ul>",v:(c)=>c.includes("<ul>")},
-{t:"Таблиця",e:"<table><tr><td>1</td></tr></table>",v:(c)=>c.includes("<table>")},
-{t:"Кнопка",e:"<button>OK</button>",v:(c)=>c.includes("<button>")},
-{t:"Div",e:"<div>Block</div>",v:(c)=>c.includes("<div>")},
-{t:"Форма",e:"<form><input></form>",v:(c)=>c.includes("<form>")}
+{
+t:"Заголовок",
+instruction:"Створи заголовок за допомогою тегу h1",
+hint:"Використай <h1>",
+exp:"<h1> використовується для головного заголовка",
+example:"<h1>Мій сайт</h1>",
+v:(c)=>c.includes("<h1>")
+},
+{
+t:"Абзац",
+instruction:"Створи абзац тексту",
+hint:"Використай <p>",
+exp:"<p> використовується для тексту",
+example:"<p>Привіт</p>",
+v:(c)=>c.includes("<p>")
+},
+{
+t:"Жирний",
+instruction:"Зроби текст жирним",
+hint:"Тег <b>",
+exp:"Жирний текст",
+example:"<b>Текст</b>",
+v:(c)=>c.includes("<b>")
+},
+{
+t:"Курсив",
+instruction:"Зроби текст курсивом",
+hint:"Тег <i>",
+exp:"Курсив",
+example:"<i>Текст</i>",
+v:(c)=>c.includes("<i>")
+},
+{
+t:"Посилання",
+instruction:"Створи посилання",
+hint:"<a href>",
+exp:"Посилання",
+example:'<a href="#">Сайт</a>',
+v:(c)=>c.includes("<a")
+}
 ];
 
 function showTab(tab){
   document.getElementById("game").classList.add("hidden");
   document.getElementById("levels").classList.add("hidden");
   document.getElementById("profile").classList.add("hidden");
-
   document.getElementById(tab).classList.remove("hidden");
 }
 
 function loadLevel(i){
+
   if(i > user.unlocked){
-    alert("🔒 Рівень заблоковано");
+    alert("🔒 Заблоковано");
     return;
   }
 
@@ -176,17 +195,18 @@ function loadLevel(i){
   let t = tasks[i];
 
   document.getElementById("lessonTitle").innerText = t.t;
-  document.getElementById("example").innerHTML = "<pre>"+t.e+"</pre>";
+  document.getElementById("instruction").innerHTML = "📌 Завдання: " + t.instruction;
+  document.getElementById("hint").innerHTML = "💡 Підказка: " + t.hint;
+  document.getElementById("explanation").innerHTML = "🧠 Пояснення: " + t.exp;
+  document.getElementById("example").innerHTML = "🧾 Приклад: <pre>"+t.example+"</pre>";
+
   document.getElementById("code").value="";
-  document.getElementById("msg").innerText="";
-  document.getElementById("preview").innerHTML="";
 }
 
 function check(){
 
   let code = document.getElementById("code").value;
   let t = tasks[currentLevel];
-
   let preview = document.getElementById("preview");
 
   preview.classList.remove("correct","wrong");
@@ -197,6 +217,7 @@ function check(){
     errorSound.play();
     user.streak = 0;
     save();
+    updateUI();
     return;
   }
 
@@ -230,16 +251,15 @@ function renderLevels(){
   tasks.forEach((t,i)=>{
 
     let btn = document.createElement("div");
-    btn.className = "level-btn";
+    btn.className="level-btn";
 
     if(i < user.unlocked){
       btn.classList.add("open");
-    }else{
+    } else {
       btn.classList.add("locked");
     }
 
     btn.innerText = t.t;
-
     btn.onclick = ()=>loadLevel(i);
 
     grid.appendChild(btn);
@@ -250,13 +270,6 @@ function updateUI(){
   document.getElementById("xp").innerText = user.xp;
   document.getElementById("levelUser").innerText = user.level;
   document.getElementById("streak").innerText = user.streak;
-
-  let badges = document.getElementById("badges");
-  badges.innerHTML="";
-
-  if(user.level >= 2) badges.innerHTML += '<div class="badge">Новачок</div>';
-  if(user.level >= 5) badges.innerHTML += '<div class="badge">Учень</div>';
-  if(user.level >= 10) badges.innerHTML += '<div class="badge">Майстер</div>';
 }
 
 function save(){
