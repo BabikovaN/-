@@ -92,6 +92,7 @@ input, textarea {
 <div id="error" style="color:red; font-weight:bold;"></div>
 
 <script>
+
 let level = 1;
 let output = document.getElementById("output");
 let gameArea = document.getElementById("gameArea");
@@ -123,6 +124,14 @@ function checkHTML(code){
   return "ok";
 }
 
+/* 🔍 додаткова проста перевірка */
+function hasBrokenTags(text){
+  let open = (text.match(/<[^/][^>]*>/g) || []).length;
+  let close = (text.match(/<\/[^>]+>/g) || []).length;
+
+  return open !== close;
+}
+
 function loadLevel(){
   gameArea.innerHTML="";
   output.innerHTML="";
@@ -134,7 +143,6 @@ function loadLevel(){
       gameArea.innerHTML=`
       <div class="card">
         <h2>Зроби кнопку червоною 🔴</h2>
-        <div class="hint">Натисни правильний колір</div>
         <button onclick="setColor('red')">🔴</button>
         <button onclick="setColor('blue')">🔵</button>
         <button onclick="setColor('green')">🟢</button>
@@ -146,7 +154,6 @@ function loadLevel(){
       gameArea.innerHTML=`
       <div class="card">
         <h2>Заголовок</h2>
-        <div class="hint">Це назва сторінки</div>
         <div class="example">&lt;h1&gt;Мій кіт&lt;/h1&gt;</div>
         <input id="titleInput" placeholder="Мій кіт">
         <button onclick="setTitle()">Створити</button>
@@ -157,7 +164,6 @@ function loadLevel(){
       gameArea.innerHTML=`
       <div class="card">
         <h2>Опис</h2>
-        <div class="hint">Напиши текст</div>
         <div class="example">&lt;p&gt;Мій кіт...&lt;/p&gt;</div>
         <textarea id="textInput"></textarea>
         <button onclick="setParagraph()">Додати</button>
@@ -168,8 +174,6 @@ function loadLevel(){
       gameArea.innerHTML=`
       <div class="card">
         <h2>Картинка</h2>
-        <div class="hint">Встав посилання</div>
-        <div class="example">&lt;img src="..."&gt;</div>
         <input id="imgInput">
         <button onclick="setImage()">Додати</button>
       </div>`;
@@ -179,7 +183,6 @@ function loadLevel(){
       gameArea.innerHTML=`
       <div class="card">
         <h2>Список</h2>
-        <div class="hint">через кому</div>
         <input id="listInput" placeholder="м'яч, рибка">
         <button onclick="setList()">Додати</button>
       </div>`;
@@ -245,26 +248,55 @@ function setColor(c){
 }
 
 function setTitle(){
-  let v=titleInput.value;
-  if(v) { output.innerHTML="<h1>"+v+"</h1>"; next(); }
+  let v = titleInput.value;
+
+  if(hasBrokenTags(v)){
+    errorBox.innerText = "❌ Неправильний HTML";
+    return;
+  }
+
+  output.innerHTML="<h1>"+v+"</h1>";
+  next();
 }
 
 function setParagraph(){
-  let v=textInput.value;
-  if(v) { output.innerHTML="<p>"+v+"</p>"; next(); }
+  let v = textInput.value;
+
+  if(hasBrokenTags(v)){
+    errorBox.innerText = "❌ Неправильний HTML у тексті";
+    return;
+  }
+
+  output.innerHTML="<p>"+v+"</p>";
+  next();
 }
 
 function setImage(){
-  let v=imgInput.value;
-  if(v) { output.innerHTML="<img src='"+v+"'>"; next(); }
+  let v = imgInput.value;
+
+  if(hasBrokenTags(v)){
+    errorBox.innerText = "❌ Неправильний HTML";
+    return;
+  }
+
+  output.innerHTML="<img src='"+v+"'>";
+  next();
 }
 
 function setList(){
-  let items=listInput.value.split(",");
-  let html="<ul>";
+  let v = listInput.value;
+
+  if(hasBrokenTags(v)){
+    errorBox.innerText = "❌ Неправильний HTML";
+    return;
+  }
+
+  let items = v.split(",");
+  let html = "<ul>";
   items.forEach(i=> html+="<li>"+i+"</li>");
   html+="</ul>";
-  output.innerHTML=html;
+
+  output.innerHTML = html;
   next();
 }
 
@@ -306,7 +338,6 @@ function showFinalSite(){
     return;
   }
 
-  errorBox.innerText = "";
   output.innerHTML = code;
 }
 
@@ -317,6 +348,7 @@ function next(){
 }
 
 loadLevel();
+
 </script>
 
 </div>
