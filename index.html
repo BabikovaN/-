@@ -7,13 +7,22 @@
 <style>
 body {
   font-family: Arial;
-  background:#e9eef5;
   margin:0;
+  background:#eef2f7;
+}
+
+.header {
+  background:#1e1e2f;
+  color:white;
+  padding:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
 
 .container {
   display:flex;
-  height:100vh;
+  height:calc(100vh - 50px);
 }
 
 .panel {
@@ -28,18 +37,18 @@ body {
 }
 
 .right {
-  background:#ffffff;
+  background:#fff;
   border-left:2px solid #ddd;
 }
 
 textarea {
   width:100%;
-  height:300px;
+  height:250px;
   background:#111;
   color:#0f0;
   border:none;
   padding:10px;
-  font-family: monospace;
+  font-family:monospace;
 }
 
 button {
@@ -51,8 +60,28 @@ button {
 #preview {
   border:1px solid #ccc;
   padding:10px;
-  min-height:200px;
-  margin-bottom:10px;
+  min-height:150px;
+}
+
+.progress {
+  height:10px;
+  background:#444;
+  border-radius:5px;
+  overflow:hidden;
+  margin:10px 0;
+}
+
+.progress-bar {
+  height:100%;
+  width:0%;
+  background:#4da3ff;
+  transition:0.3s;
+}
+
+.badge {
+  background:#4da3ff;
+  padding:5px 10px;
+  border-radius:8px;
 }
 
 #hintBox {
@@ -62,10 +91,32 @@ button {
   border-radius:8px;
   margin-top:10px;
 }
+
+.success {
+  animation: pop 0.4s ease;
+}
+
+@keyframes pop {
+  0% { transform:scale(1); }
+  50% { transform:scale(1.1); }
+  100% { transform:scale(1); }
+}
 </style>
 </head>
 
 <body>
+
+<div class="header">
+  <div>🐾 HTML Trainer</div>
+  <div>
+    XP: <span id="xp">0</span> |
+    Streak: <span id="streak">0</span>
+  </div>
+</div>
+
+<div class="progress">
+  <div class="progress-bar" id="progressBar"></div>
+</div>
 
 <div class="container">
 
@@ -90,7 +141,7 @@ button {
   </div>
 
   <div class="panel right">
-    <h3>👀 Результат</h3>
+    <h3>👀 Preview</h3>
     <div id="preview"></div>
 
     <h3>🧾 Код</h3>
@@ -104,83 +155,87 @@ button {
 
 <script>
 
+// ===== STATE =====
+let user = JSON.parse(localStorage.getItem("user")) || {
+ xp:0,
+ streak:0,
+ currentLevel:0
+};
+
 // ===== PARSER =====
 function parseHTML(code){
   let parser = new DOMParser();
-  let doc = parser.parseFromString(code, "text/html");
-  return doc.body;
+  return parser.parseFromString(code,"text/html").body;
 }
 
 // ===== TASKS =====
 const tasks = [
-{t:"🐾 Заголовок",instruction:"Створи заголовок",hint:"<h1>Текст</h1>",example:"<h1>Кіт</h1>",check:(doc)=>{
+{t:"🐾 Заголовок",instruction:"Створи <h1>",hint:"<h1>Кіт</h1>",example:"<h1>Кіт</h1>",check:(doc)=>{
  let el = doc.querySelector("h1");
- return {
-  ok: el && el.textContent.trim().length > 0,
-  errors: [
-   !el ? "❌ Немає <h1>" : null,
-   el && el.textContent.trim()=="" ? "❌ Порожній заголовок" : null
-  ].filter(Boolean)
- }
+ return {ok: el && el.textContent.trim(), errors: !el?["❌ Немає <h1>"]:[]}
 }},
-{t:"🐾 Абзац",instruction:"Додай абзац",hint:"<p>",example:"<p>Текст</p>",check:(doc)=>{
+{t:"🐾 Абзац",instruction:"Створи <p>",hint:"<p>",example:"<p>Текст</p>",check:(doc)=>{
  let el = doc.querySelector("p");
- return {ok: el && el.textContent.trim(), errors: !el?["❌ Немає <p>"]:[]}
+ return {ok: el, errors: !el?["❌ Немає <p>"]:[]}
 }},
-{t:"🐾 Жирний",instruction:"Жирний текст",hint:"<b>",example:"<b>Текст</b>",check:(doc)=>{
- let el = doc.querySelector("b");
- return {ok: el, errors: !el?["❌ Немає <b>"]:[]}
+{t:"🐾 Жирний",instruction:"<b>",hint:"",example:"<b>Текст</b>",check:(doc)=>{
+ return {ok: doc.querySelector("b"), errors: doc.querySelector("b")?[]:["❌ Немає <b>"]}
 }},
-{t:"🐾 Курсив",instruction:"Курсив",hint:"<i>",example:"<i>Текст</i>",check:(doc)=>{
- let el = doc.querySelector("i");
- return {ok: el, errors: !el?["❌ Немає <i>"]:[]}
+{t:"🐾 Курсив",instruction:"<i>",hint:"",example:"<i>Текст</i>",check:(doc)=>{
+ return {ok: doc.querySelector("i"), errors: doc.querySelector("i")?[]:["❌ Немає <i>"]}
 }},
-{t:"🐾 Посилання",instruction:"Посилання",hint:"<a href>",example:'<a href="#">Link</a>',check:(doc)=>{
+{t:"🐾 Посилання",instruction:"<a>",hint:"",example:'<a href="#">Link</a>',check:(doc)=>{
  let el = doc.querySelector("a");
  return {ok: el && el.hasAttribute("href"), errors: !el?["❌ Немає <a>"]:[]}
 }},
-{t:"🐾 Зображення",instruction:"Фото",hint:"<img>",example:'<img src="cat.jpg">',check:(doc)=>{
- let el = doc.querySelector("img");
- return {ok: el, errors: !el?["❌ Немає <img>"]:[]}
+{t:"🐾 Зображення",instruction:"<img>",hint:"",example:'<img src="cat.jpg">',check:(doc)=>{
+ return {ok: doc.querySelector("img"), errors: doc.querySelector("img")?[]:["❌ Немає <img>"]}
 }},
-{t:"🐾 Список",instruction:"Список",hint:"<ul><li>",example:"<ul><li></li></ul>",check:(doc)=>{
+{t:"🐾 Список",instruction:"<ul>",hint:"",example:"<ul><li></li></ul>",check:(doc)=>{
  let el = doc.querySelector("ul");
  return {ok: el && el.querySelector("li"), errors: !el?["❌ Немає <ul>"]:[]}
 }},
-{t:"🐾 Нумерований список",instruction:"<ol>",hint:"",example:"<ol><li></li></ol>",check:(doc)=>{
+{t:"🐾 OL список",instruction:"<ol>",hint:"",example:"<ol><li></li></ol>",check:(doc)=>{
  let el = doc.querySelector("ol");
  return {ok: el && el.querySelector("li"), errors: !el?["❌ Немає <ol>"]:[]}
 }},
-{t:"🐾 Контейнер",instruction:"<div>",hint:"",example:"<div></div>",check:(doc)=>{
- let el = doc.querySelector("div");
- return {ok: el, errors: !el?["❌ Немає <div>"]:[]}
+{t:"🐾 DIV",instruction:"<div>",hint:"",example:"<div></div>",check:(doc)=>{
+ return {ok: doc.querySelector("div"), errors: doc.querySelector("div")?[]:["❌ Немає <div>"]}
 }},
-{t:"🐾 Кнопка",instruction:"<button>",hint:"",example:"<button>OK</button>",check:(doc)=>{
+{t:"🐾 Button",instruction:"<button>",hint:"",example:"<button>OK</button>",check:(doc)=>{
  let el = doc.querySelector("button");
  return {ok: el && el.textContent.trim(), errors: !el?["❌ Немає <button>"]:[]}
 }},
-{t:"🐾 Форма",instruction:"<form>",hint:"",example:"<form></form>",check:(doc)=>{
- let el = doc.querySelector("form");
- return {ok: el, errors: !el?["❌ Немає <form>"]:[]}
+{t:"🐾 Form",instruction:"<form>",hint:"",example:"<form></form>",check:(doc)=>{
+ return {ok: doc.querySelector("form"), errors: doc.querySelector("form")?[]:["❌ Немає <form>"]}
 }}
 ];
 
+// ===== UI =====
+function updateUI(){
+ document.getElementById("xp").innerText = user.xp;
+ document.getElementById("streak").innerText = user.streak;
+
+ let progress = (user.currentLevel / tasks.length)*100;
+ document.getElementById("progressBar").style.width = progress + "%";
+}
+
 // ===== LEVEL =====
-let currentLevel = 0;
-
 function loadLevel(i){
- currentLevel = i;
- let task = tasks[i];
+ user.currentLevel = i;
+ localStorage.setItem("user", JSON.stringify(user));
 
- document.getElementById("levelTitle").innerText = task.t;
- document.getElementById("instruction").innerText = task.instruction;
- document.getElementById("hint").innerText = task.hint;
- document.getElementById("example").innerText = task.example;
+ let t = tasks[i];
+ document.getElementById("levelTitle").innerText = t.t;
+ document.getElementById("instruction").innerText = t.instruction;
+ document.getElementById("hint").innerText = t.hint;
+ document.getElementById("example").innerText = t.example;
 
  let saved = localStorage.getItem("code_"+i) || "";
  document.getElementById("code").value = saved;
 
  updatePreview();
+ updateUI();
 }
 
 // ===== PREVIEW =====
@@ -194,37 +249,44 @@ function updatePreview(){
 function check(){
  let code = document.getElementById("code").value;
  let doc = parseHTML(code);
- let task = tasks[currentLevel];
+ let task = tasks[user.currentLevel];
 
  let result = task.check(doc);
 
  if(result.ok){
   document.getElementById("msg").innerText = "✅ Правильно!";
+  document.getElementById("msg").classList.add("success");
   document.getElementById("successSound").play();
 
-  localStorage.setItem("code_"+currentLevel, code);
+  user.xp += 20;
+  user.streak += 1;
 
-  if(currentLevel < tasks.length - 1){
-   loadLevel(currentLevel + 1);
+  localStorage.setItem("code_"+user.currentLevel, code);
+
+  if(user.currentLevel < tasks.length-1){
+   loadLevel(user.currentLevel+1);
   }
 
  } else {
   document.getElementById("msg").innerText = result.errors.join(" | ");
   document.getElementById("failSound").play();
  }
+
+ localStorage.setItem("user", JSON.stringify(user));
+ updateUI();
 }
 
 // ===== HINT =====
 function toggleHint(){
  let box = document.getElementById("hintBox");
- box.style.display = (box.style.display === "none") ? "block" : "none";
+ box.style.display = box.style.display === "none" ? "block" : "none";
 }
 
 // ===== EVENTS =====
 document.getElementById("code").addEventListener("input", updatePreview);
 
 // ===== INIT =====
-loadLevel(0);
+loadLevel(user.currentLevel || 0);
 
 </script>
 
