@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HTML Гра</title>
+<title>HTML Навчання PRO+</title>
 
 <style>
 body{
@@ -15,88 +15,66 @@ body{
 
 h1{color:white}
 
-.container{
-  max-width:700px;
-  margin:auto;
-  padding:10px;
+.nav button{
+  margin:5px;
 }
+
+.container{max-width:800px;margin:auto;padding:10px;}
 
 .card{
   background:white;
   padding:20px;
   margin:15px;
   border-radius:15px;
-  box-shadow:0 5px 15px rgba(0,0,0,0.1);
 }
 
 textarea{
   width:95%;
-  max-width:500px;
+  max-width:600px;
   padding:10px;
-  margin:10px 0;
-  font-size:16px;
   font-family: monospace;
 }
 
 button{
-  padding:12px 20px;
-  margin-top:10px;
-  font-size:16px;
+  padding:10px 15px;
   border:none;
-  border-radius:10px;
+  border-radius:8px;
   background:#4da3ff;
   color:white;
 }
 
-.error{color:red;font-weight:bold;}
-.success{color:green;font-weight:bold;}
+.correct{border:3px solid green;}
+.wrong{border:3px solid red;}
 
-.example{
-  background:#2d3436;
-  color:#00ffcc;
-  padding:12px;
-  border-radius:10px;
-  font-family: monospace;
-  text-align:left;
+.hidden{display:none;}
+
+.level-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
 }
 
-/* рамки */
-.preview-box{
-  margin-top:10px;
+.level-btn{
   padding:15px;
   border-radius:10px;
-  border:2px solid #ccc;
+  background:#dfe6e9;
+  cursor:pointer;
 }
 
-.correct{
-  border:3px solid green;
+.level-btn.locked{
+  background:#b2bec3;
+  cursor:not-allowed;
 }
 
-.wrong{
-  border:3px solid red;
+.level-btn.open{
+  background:#55efc4;
 }
 
-/* прогрес бар */
-.progress-bar{
-  width:100%;
-  background:#ddd;
-  border-radius:10px;
-  margin:10px 0;
-}
-
-.progress{
-  height:15px;
-  width:0%;
-  background:#4da3ff;
-  border-radius:10px;
-}
-
-.compare{
-  margin-top:10px;
-  text-align:left;
-  font-family: monospace;
-  background:#f1f2f6;
-  padding:10px;
+.badge{
+  display:inline-block;
+  padding:5px 10px;
+  background:gold;
+  margin:5px;
   border-radius:10px;
 }
 </style>
@@ -104,151 +82,192 @@ button{
 
 <body>
 
-<h1>🎮 HTML Гра</h1>
+<h1>🎮 HTML Навчання PRO+</h1>
+
+<div class="nav">
+  <button onclick="showTab('game')">🎯 Гра</button>
+  <button onclick="showTab('levels')">📋 Рівні</button>
+  <button onclick="showTab('profile')">👤 Профіль</button>
+</div>
 
 <div class="container">
-  <div class="card">
 
-    <div class="progress-bar">
-      <div id="progress" class="progress"></div>
-    </div>
+<!-- GAME -->
+<div id="game" class="card">
 
-    <div id="task"></div>
+  <h2 id="lessonTitle"></h2>
+  <div id="example"></div>
 
-    <textarea id="code" placeholder="Впиши код..."></textarea>
+  <textarea id="code"></textarea>
 
-    <br>
-    <button onclick="check()">Перевірити</button>
+  <br>
+  <button onclick="check()">Перевірити</button>
 
-    <p id="msg"></p>
+  <p id="msg"></p>
 
-    <div id="preview" class="preview-box"></div>
+  <div id="preview"></div>
 
-    <div id="compare"></div>
+</div>
 
-  </div>
+<!-- LEVELS -->
+<div id="levels" class="card hidden">
+  <h2>📋 Вибір рівнів</h2>
+  <div id="levelsGrid" class="level-grid"></div>
+</div>
+
+<!-- PROFILE -->
+<div id="profile" class="card hidden">
+  <h2>👤 Профіль</h2>
+  <p>XP: <span id="xp"></span></p>
+  <p>Рівень: <span id="levelUser"></span></p>
+  <p>Streak: <span id="streak"></span></p>
+
+  <h3>🏅 Бейджі:</h3>
+  <div id="badges"></div>
+</div>
+
 </div>
 
 <script>
 
-let level = 0;
+const successSound = new Audio("https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg");
+const errorSound = new Audio("https://actions.google.com/sounds/v1/cartoon/boing.ogg");
+
+let user = JSON.parse(localStorage.getItem("user")) || {
+  xp:0,
+  level:1,
+  streak:0,
+  unlocked:1
+};
+
+let currentLevel = 0;
 
 const tasks = [
-{ text: "Зроби заголовок", example: "<h1>Текст</h1>", validate:(c)=> c.includes("<h1>") && c.includes("</h1>") },
-
-{ text: "Зроби абзац", example: "<p>Привіт</p>", validate:(c)=> c.includes("<p>") && c.includes("</p>") },
-
-{ text: "Жирний текст", example: "<b>Жирний</b>", validate:(c)=> c.includes("<b>") && c.includes("</b>") },
-
-{ text: "Курсив", example: "<i>Курсив</i>", validate:(c)=> c.includes("<i>") && c.includes("</i>") },
-
-{ text: "Посилання", example: '<a href="#">Сайт</a>', validate:(c)=> c.includes("<a") && c.includes("</a>") && c.includes("href") },
-
-{ text: "Зображення", example: '<img src="https://placekitten.com/200/200">', validate:(c)=> c.includes("<img") && c.includes("src=") },
-
-{ text: "Список", example: "<ul><li>1</li></ul>", validate:(c)=> c.includes("<ul>") && c.includes("<li>") },
-
-{ text: "Таблиця", example: "<table><tr><td>1</td></tr></table>", validate:(c)=> c.includes("<table>") && c.includes("<td>") },
-
-{ text: "Кнопка", example: "<button>Натисни</button>", validate:(c)=> c.includes("<button>") && c.includes("</button>") },
-
-{ text: "Div блок", example: "<div>Блок</div>", validate:(c)=> c.includes("<div>") && c.includes("</div>") },
-
-{ text: "Форма", example: "<form><input></form>", validate:(c)=> c.includes("<form>") && c.includes("<input>") }
+{t:"Заголовок",e:"<h1>Text</h1>",v:(c)=>c.includes("<h1>")},
+{t:"Абзац",e:"<p>Text</p>",v:(c)=>c.includes("<p>")},
+{t:"Жирний",e:"<b>Text</b>",v:(c)=>c.includes("<b>")},
+{t:"Курсив",e:"<i>Text</i>",v:(c)=>c.includes("<i>")},
+{t:"Посилання",e:'<a href="#">Link</a>',v:(c)=>c.includes("<a")},
+{t:"Зображення",e:'<img src="img.jpg">',v:(c)=>c.includes("<img")},
+{t:"Список",e:"<ul><li>1</li></ul>",v:(c)=>c.includes("<ul>")},
+{t:"Таблиця",e:"<table><tr><td>1</td></tr></table>",v:(c)=>c.includes("<table>")},
+{t:"Кнопка",e:"<button>OK</button>",v:(c)=>c.includes("<button>")},
+{t:"Div",e:"<div>Block</div>",v:(c)=>c.includes("<div>")},
+{t:"Форма",e:"<form><input></form>",v:(c)=>c.includes("<form>")}
 ];
 
-function loadTask(){
+function showTab(tab){
+  document.getElementById("game").classList.add("hidden");
+  document.getElementById("levels").classList.add("hidden");
+  document.getElementById("profile").classList.add("hidden");
 
-  if(level >= tasks.length){
-    document.getElementById("task").innerHTML = "🎉 Всі рівні пройдено!";
+  document.getElementById(tab).classList.remove("hidden");
+}
+
+function loadLevel(i){
+  if(i > user.unlocked){
+    alert("🔒 Рівень заблоковано");
     return;
   }
 
-  let t = tasks[level];
+  currentLevel = i;
+  showTab('game');
 
-  document.getElementById("task").innerHTML = `
-    <h2>${t.text}</h2>
-    <p>Приклад:</p>
-    <div class="example"><pre>${escapeHtml(t.example)}</pre></div>
-  `;
+  let t = tasks[i];
 
-  let saved = localStorage.getItem("level_" + level);
-  document.getElementById("code").value = saved ? saved : "";
-
-  updateProgress();
+  document.getElementById("lessonTitle").innerText = t.t;
+  document.getElementById("example").innerHTML = "<pre>"+t.e+"</pre>";
+  document.getElementById("code").value="";
+  document.getElementById("msg").innerText="";
+  document.getElementById("preview").innerHTML="";
 }
 
-document.getElementById("code").addEventListener("input", function(){
-  localStorage.setItem("level_" + level, this.value);
-});
-
 function check(){
-  let code = document.getElementById("code").value.trim();
-  let t = tasks[level];
+
+  let code = document.getElementById("code").value;
+  let t = tasks[currentLevel];
 
   let preview = document.getElementById("preview");
-  let msg = document.getElementById("msg");
-  let compare = document.getElementById("compare");
 
   preview.classList.remove("correct","wrong");
 
-  if(!code){
-    showError("❌ Введи код");
+  if(!t.v(code)){
+    document.getElementById("msg").innerText="❌ Помилка";
     preview.classList.add("wrong");
+    errorSound.play();
+    user.streak = 0;
+    save();
     return;
   }
 
-  if(!t.validate(code)){
-    showError("❌ Невірно");
-    preview.classList.add("wrong");
-    showCompare(code, t.example);
-    return;
-  }
-
-  showSuccess("✅ Правильно!");
+  document.getElementById("msg").innerText="✅ Правильно!";
   preview.classList.add("correct");
   preview.innerHTML = code;
 
-  compare.innerHTML = "";
+  successSound.play();
 
-  localStorage.setItem("completed_" + level, "true");
+  user.xp += 20;
+  user.streak++;
 
-  level++;
-  setTimeout(loadTask, 1200);
+  if(user.xp >= 100){
+    user.level++;
+    user.xp = 0;
+  }
+
+  if(currentLevel >= user.unlocked){
+    user.unlocked++;
+  }
+
+  save();
+  updateUI();
+  renderLevels();
 }
 
-function showError(msg){
-  document.getElementById("msg").innerHTML = `<span class="error">${msg}</span>`;
+function renderLevels(){
+  let grid = document.getElementById("levelsGrid");
+  grid.innerHTML="";
+
+  tasks.forEach((t,i)=>{
+
+    let btn = document.createElement("div");
+    btn.className = "level-btn";
+
+    if(i < user.unlocked){
+      btn.classList.add("open");
+    }else{
+      btn.classList.add("locked");
+    }
+
+    btn.innerText = t.t;
+
+    btn.onclick = ()=>loadLevel(i);
+
+    grid.appendChild(btn);
+  });
 }
 
-function showSuccess(msg){
-  document.getElementById("msg").innerHTML = `<span class="success">${msg}</span>`;
+function updateUI(){
+  document.getElementById("xp").innerText = user.xp;
+  document.getElementById("levelUser").innerText = user.level;
+  document.getElementById("streak").innerText = user.streak;
+
+  let badges = document.getElementById("badges");
+  badges.innerHTML="";
+
+  if(user.level >= 2) badges.innerHTML += '<div class="badge">Новачок</div>';
+  if(user.level >= 5) badges.innerHTML += '<div class="badge">Учень</div>';
+  if(user.level >= 10) badges.innerHTML += '<div class="badge">Майстер</div>';
 }
 
-function showCompare(userCode, correctCode){
-  document.getElementById("compare").innerHTML = `
-    <div class="compare">
-      <b>❌ Твій код:</b><br>${escapeHtml(userCode)}<br><br>
-      <b>✅ Правильний приклад:</b><br>${escapeHtml(correctCode)}
-    </div>
-  `;
+function save(){
+  localStorage.setItem("user",JSON.stringify(user));
 }
 
-function updateProgress(){
-  let percent = (level / tasks.length) * 100;
-  document.getElementById("progress").style.width = percent + "%";
-}
-
-function escapeHtml(text){
-  return text
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;");
-}
-
-loadTask();
+renderLevels();
+updateUI();
+loadLevel(0);
 
 </script>
-  
+
 </body>
 </html>
