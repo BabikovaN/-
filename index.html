@@ -5,70 +5,100 @@
 <title>Pet HTML Trainer 🐾</title>
 
 <style>
-// ===== CHECK =====
-function check(){
- let code = document.getElementById("code").value;
- let doc = parseHTML(code);
- let task = tasks[user.currentLevel];
-
- let result = task.check(doc);
-
- if(result.ok){
-  document.getElementById("msg").innerText = "✅ Правильно!";
-  document.getElementById("successSound").play();
-
-  user.xp += 20;
-  user.streak += 1;
-
-  localStorage.setItem("code_"+user.currentLevel, code);
-
-  // історія
-  let history = JSON.parse(localStorage.getItem("fullHistory")) || [];
-  history.push({
-   level: user.currentLevel,
-   code: code
-  });
-  localStorage.setItem("fullHistory", JSON.stringify(history));
-
-  updateCodeView();
-  updateFullHistory();
-
-  if(user.currentLevel < tasks.length-1){
-   loadLevel(user.currentLevel+1);
-  }
-
- } else {
-  document.getElementById("msg").innerText = "❌ Спробуй ще";
- }
-
- localStorage.setItem("user", JSON.stringify(user));
- updateUI();
+body {
+  font-family: Arial;
+  margin:0;
+  background:#eef2f7;
 }
 
-// ===== HINT =====
-function toggleHint(){
- let box = document.getElementById("hintBox");
- box.style.display = box.style.display === "none" ? "block" : "none";
+.header {
+  background:#1e1e2f;
+  color:white;
+  padding:10px;
+  display:flex;
+  justify-content:space-between;
 }
 
-// ===== RESTART =====
-function restartGame(){
- if(!confirm("Почати гру заново?")) return;
+.container {
+  display:flex;
+  height:calc(100vh - 60px);
+}
 
- localStorage.clear();
+.panel {
+  flex:1;
+  padding:15px;
+  overflow:auto;
+}
 
- user = {
-  xp:0,
-  streak:0,
-  currentLevel:0
- };
+.left {
+  background:#1e1e2f;
+  color:white;
+}
 
- document.getElementById("code").value = "";
+.right {
+  background:white;
+  border-left:2px solid #ddd;
+}
 
- updatePreview();
- loadLevel(0);
- updateUI();
- updateFullHistory();
+textarea {
+  width:100%;
+  height:200px;
+  background:#111;
+  color:#0f0;
+  border:none;
+  padding:10px;
+  font-family:monospace;
+}
+
+button {
+  padding:10px;
+  margin-top:10px;
+  cursor:pointer;
+  border:none;
+  border-radius:8px;
+  background:#4da3ff;
+  color:white;
+}
+
+#preview {
+  border:1px solid #ccc;
+  padding:10px;
+  min-height:120px;
+  background:#fff;
+}
+
+pre {
+  background:#111;
+  color:#0f0;
+  padding:10px;
+  height:150px;
+  overflow:auto;
+}
+
+iframe {
+  width:100%;
+  height:200px;
+  border:none;
+  background:#fff;
+}
+
+.progress {
+  height:10px;
+  background:#444;
+}
+
+.progress-bar {
+  height:100%;
+  width:0%;
+  background:#4da3ff;
+}
+
+#hintBox {
+  display:none;
+  background:#dff6ff;
+  padding:10px;
+  border-radius:8px;
+  color:black;
 }
 </style>
 </head>
@@ -89,6 +119,7 @@ function restartGame(){
 
 <div class="container">
 
+  <!-- LEFT -->
   <div class="panel left">
     <h2 id="levelTitle"></h2>
 
@@ -106,177 +137,87 @@ function restartGame(){
     <textarea id="code"></textarea>
 
     <button onclick="check()">Перевірити</button>
+    <button onclick="restartGame()">🔄 Почати заново</button>
 
     <p id="msg"></p>
   </div>
 
- <div class="panel right">
+  <!-- RIGHT -->
+  <div class="panel right">
     <h3>👀 Preview</h3>
     <div id="preview"></div>
 
     <h3>🧾 Код</h3>
     <pre id="codeView"></pre>
-  </div>
 
-  <!-- ✅ НОВИЙ БЛОК ТУТ -->
- <div class="panel right">
-  <h3>📜 Мій сайт</h3>
-  <iframe id="fullHistory" style="width:100%; height:100%; border:none;"></iframe>
-
-
-    <button onclick="restartGame()">🔄 Почати заново</button>
+    <h3>🌐 Мій сайт</h3>
+    <iframe id="fullHistory"></iframe>
   </div>
 
 </div>
-<audio id="successSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
-<audio id="failSound" src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg"></audio>
-
 
 <script>
 
 // ===== STATE =====
 let user = JSON.parse(localStorage.getItem("user")) || {
-  xp: 0,
-  streak: 0,
-  currentLevel: 0
+ xp:0,
+ streak:0,
+ currentLevel:0
 };
 
 // ===== PARSER =====
 function parseHTML(code){
-  let parser = new DOMParser();
-  return parser.parseFromString(code, "text/html").body;
+ let parser = new DOMParser();
+ return parser.parseFromString(code,"text/html").body;
 }
 
 // ===== CODE VIEW =====
 function updateCodeView(){
-  let allCode = "";
+ let allCode = "";
 
-  for(let i = 0; i <= user.currentLevel; i++){
-    let saved = localStorage.getItem("code_" + i);
-    if(saved){
-      allCode += `--- Рівень ${i+1} ---\n${saved}\n\n`;
-    }
+ for(let i = 0; i <= user.currentLevel; i++){
+  let saved = localStorage.getItem("code_"+i);
+  if(saved){
+   allCode += `--- Рівень ${i+1} ---\n${saved}\n\n`;
   }
+ }
 
-  let current = document.getElementById("code").value;
-  allCode += "--- Поточний ---\n" + current;
+ let current = document.getElementById("code").value;
+ allCode += "--- Поточний ---\n" + current;
 
-  document.getElementById("codeView").innerText = allCode;
+ document.getElementById("codeView").innerText = allCode;
 }
 
-// ===== REAL SITE (iframe) =====
+// ===== REAL SITE =====
 function updateFullHistory(){
-  let code = document.getElementById("code").value;
-  document.getElementById("fullHistory").srcdoc = code;
+ let code = document.getElementById("code").value;
+ document.getElementById("fullHistory").srcdoc = code;
 }
 
 // ===== PREVIEW =====
 function updatePreview(){
-  let code = document.getElementById("code").value;
+ let code = document.getElementById("code").value;
 
-  // Лівий preview
-  document.getElementById("preview").innerHTML = code;
+ document.getElementById("preview").innerHTML = code;
 
-  // "Мій сайт"
-  updateFullHistory();
-
-  // Код
-  updateCodeView();
+ updateFullHistory();
+ updateCodeView();
 }
 
-// ===== EVENTS =====
-document.getElementById("code").addEventListener("input", updatePreview);
-
-// ===== INIT =====
-updatePreview();
-
-
-// ===== TASKS (12 рівнів) =====
+// ===== TASKS =====
 const tasks = [
-{
- t:"🐱 Рівень 1",
- instruction:"Зроби великий заголовок 🐾",
- hint:"<h1>",
- example:"<h1>Кіт</h1>",
- check:(doc)=>({ok: doc.querySelector("h1"), errors:[]})
-},
-{
- t:"🐶 Рівень 2",
- instruction:"Напиши текст 🐾",
- hint:"<p>",
- example:"<p>Текст</p>",
- check:(doc)=>({ok: doc.querySelector("p"), errors:[]})
-},
-{
- t:"🐱 Рівень 3",
- instruction:"Жирний текст 🐾",
- hint:"<b>",
- example:"<b>Кіт</b>",
- check:(doc)=>({ok: doc.querySelector("b"), errors:[]})
-},
-{
- t:"🐶 Рівень 4",
- instruction:"Курсив 🐾",
- hint:"<i>",
- example:"<i>Кіт</i>",
- check:(doc)=>({ok: doc.querySelector("i"), errors:[]})
-},
-{
- t:"🐱 Рівень 5",
- instruction:"Посилання 🔗",
- hint:"<a href>",
- example:'<a href="#">link</a>',
- check:(doc)=>({ok: doc.querySelector("a"), errors:[]})
-},
-{
- t:"🐶 Рівень 6",
- instruction:"Картинка 🖼️",
- hint:"<img>",
- example:'<img src="...">',
- check:(doc)=>({ok: doc.querySelector("img"), errors:[]})
-},
-{
- t:"🐱 Рівень 7",
- instruction:"Список 📝",
- hint:"<ul><li>",
- example:`<ul><li>1</li><li>2</li><li>3</li></ul>`,
- check:(doc)=>({ok: doc.querySelector("ul") && doc.querySelector("li"), errors:[]})
-},
-{
- t:"🐶 Рівень 8",
- instruction:"Нумерований список 🔢",
- hint:"<ol>",
- example:`<ol><li>1</li><li>2</li><li>3</li></ol>`,
- check:(doc)=>({ok: doc.querySelector("ol") && doc.querySelector("li"), errors:[]})
-},
-{
- t:"🐱 Рівень 9",
- instruction:"Блок 🧱",
- hint:"<div>",
- example:"<div></div>",
- check:(doc)=>({ok: doc.querySelector("div"), errors:[]})
-},
-{
- t:"🐶 Рівень 10",
- instruction:"Кнопка 🔘",
- hint:"<button>",
- example:"<button>OK</button>",
- check:(doc)=>({ok: doc.querySelector("button"), errors:[]})
-},
-{
- t:"🐱 Рівень 11",
- instruction:"Форма 📝",
- hint:"<form>",
- example:"<form></form>",
- check:(doc)=>({ok: doc.querySelector("form"), errors:[]})
-},
-{
- t:"🏆 Рівень 12",
- instruction:"Фінал 🎉",
- hint:"<h1>",
- example:"<h1>Я молодець</h1>",
- check:(doc)=>({ok: doc.querySelector("h1"), errors:[]})
-}
+{t:"🐱 Рівень 1",instruction:"Заголовок",hint:"<h1>",example:"<h1>Кіт</h1>",check:(d)=>({ok:d.querySelector("h1")})},
+{t:"🐶 Рівень 2",instruction:"Текст",hint:"<p>",example:"<p>Текст</p>",check:(d)=>({ok:d.querySelector("p")})},
+{t:"🐱 Рівень 3",instruction:"Жирний",hint:"<b>",example:"<b>Кіт</b>",check:(d)=>({ok:d.querySelector("b")})},
+{t:"🐶 Рівень 4",instruction:"Курсив",hint:"<i>",example:"<i>Кіт</i>",check:(d)=>({ok:d.querySelector("i")})},
+{t:"🐱 Рівень 5",instruction:"Посилання",hint:"<a>",example:"<a href='#'>link</a>",check:(d)=>({ok:d.querySelector("a")})},
+{t:"🐶 Рівень 6",instruction:"Картинка",hint:"<img>",example:"<img src='...'>",check:(d)=>({ok:d.querySelector("img")})},
+{t:"🐱 Рівень 7",instruction:"Список",hint:"<ul>",example:"<ul><li>1</li><li>2</li><li>3</li></ul>",check:(d)=>({ok:d.querySelector("ul")})},
+{t:"🐶 Рівень 8",instruction:"Нумерований",hint:"<ol>",example:"<ol><li>1</li><li>2</li><li>3</li></ol>",check:(d)=>({ok:d.querySelector("ol")})},
+{t:"🐱 Рівень 9",instruction:"Блок",hint:"<div>",example:"<div></div>",check:(d)=>({ok:d.querySelector("div")})},
+{t:"🐶 Рівень 10",instruction:"Кнопка",hint:"<button>",example:"<button>OK</button>",check:(d)=>({ok:d.querySelector("button")})},
+{t:"🐱 Рівень 11",instruction:"Форма",hint:"<form>",example:"<form></form>",check:(d)=>({ok:d.querySelector("form")})},
+{t:"🏆 Рівень 12",instruction:"Фінал",hint:"<h1>",example:"<h1>Я молодець</h1>",check:(d)=>({ok:d.querySelector("h1")})}
 ];
 
 // ===== UI =====
@@ -294,6 +235,7 @@ function loadLevel(i){
  localStorage.setItem("user", JSON.stringify(user));
 
  let t = tasks[i];
+
  document.getElementById("levelTitle").innerText = t.t;
  document.getElementById("instruction").innerText = t.instruction;
  document.getElementById("hint").innerText = t.hint;
@@ -303,24 +245,6 @@ function loadLevel(i){
 
  updatePreview();
  updateUI();
- updateFullHistory();
-}
-
-// ===== PREVIEW =====
-function updatePreview(){
- let code = document.getElementById("code").value;
- document.getElementById("preview").innerHTML = code;
-
- // 🔽 зберігаємо історію
- let history = JSON.parse(localStorage.getItem("fullHistory")) || [];
- history.push({
-  level: user.currentLevel,
-  code: code
- });
- localStorage.setItem("fullHistory", JSON.stringify(history));
-
- updateCodeView();
- updateFullHistory();
 }
 
 // ===== CHECK =====
@@ -333,23 +257,10 @@ function check(){
 
  if(result.ok){
   document.getElementById("msg").innerText = "✅ Правильно!";
-  document.getElementById("successSound").play();
-
   user.xp += 20;
   user.streak += 1;
 
   localStorage.setItem("code_"+user.currentLevel, code);
-
-  // історія
-  let history = JSON.parse(localStorage.getItem("fullHistory")) || [];
-  history.push({
-   level: user.currentLevel,
-   code: code
-  });
-  localStorage.setItem("fullHistory", JSON.stringify(history));
-
-  updateCodeView();
-  updateFullHistory();
 
   if(user.currentLevel < tasks.length-1){
    loadLevel(user.currentLevel+1);
@@ -371,22 +282,16 @@ function toggleHint(){
 
 // ===== RESTART =====
 function restartGame(){
- if(!confirm("Почати гру заново?")) return;
+ if(!confirm("Почати заново?")) return;
 
  localStorage.clear();
 
- user = {
-  xp:0,
-  streak:0,
-  currentLevel:0
- };
+ user = {xp:0,streak:0,currentLevel:0};
 
  document.getElementById("code").value = "";
 
- updatePreview();
  loadLevel(0);
  updateUI();
- updateFullHistory();
 }
 
 // ===== EVENTS =====
