@@ -6,105 +6,60 @@
 
 <style>
 body {
-  font-family: "Segoe UI", Arial, sans-serif;
-  background: linear-gradient(135deg, #f4f6f9, #e9f0ff);
-  margin:20px;
-  color:#222;
+  font-family: Arial;
+  background:#e9eef5;
+  margin:0;
 }
 
-.card {
-  background:#fff;
-  padding:20px;
-  border-radius:16px;
-  margin-bottom:20px;
-  box-shadow:0 10px 25px rgba(0,0,0,0.1);
-  transition:0.3s;
-  animation: fadeIn 0.4s ease;
+.container {
+  display:flex;
+  height:100vh;
 }
 
-.card:hover {
-  transform: translateY(-3px);
+.panel {
+  flex:1;
+  padding:15px;
+  overflow:auto;
 }
 
-@keyframes fadeIn {
-  from {opacity:0; transform:translateY(10px);}
-  to {opacity:1; transform:translateY(0);}
+.left {
+  background:#1e1e2f;
+  color:white;
+}
+
+.right {
+  background:#ffffff;
+  border-left:2px solid #ddd;
 }
 
 textarea {
   width:100%;
-  height:160px;
+  height:300px;
+  background:#111;
+  color:#0f0;
+  border:none;
   padding:10px;
-  border-radius:10px;
-  border:1px solid #ccc;
-  font-size:14px;
-}
-
-#editorLayout {
-  display:flex;
-  gap:15px;
-  flex-wrap:wrap;
-}
-
-#editorLayout > div {
-  flex:1;
-  min-width:300px;
-  background:#ffffff;
-  padding:15px;
-  border-radius:12px;
-  box-shadow:0 5px 15px rgba(0,0,0,0.08);
+  font-family: monospace;
 }
 
 button {
-  padding:10px 18px;
+  padding:10px;
   margin-top:10px;
-  border:none;
-  border-radius:10px;
-  background:#4da3ff;
-  color:white;
-  font-weight:bold;
   cursor:pointer;
-  transition:0.2s;
 }
 
-button:hover {
-  background:#2f8cff;
-  transform:scale(1.05);
-}
-
-select {
-  padding:8px;
-  border-radius:8px;
+#preview {
+  border:1px solid #ccc;
+  padding:10px;
+  min-height:200px;
   margin-bottom:10px;
 }
 
 #hintBox {
   display:none;
-  background:#eef3ff;
-  padding:12px;
-  border-radius:10px;
-  margin-top:10px;
-  border-left:5px solid #4da3ff;
-}
-
-pre {
-  background:#111;
-  color:#0f0;
+  background:#333;
   padding:10px;
-  border-radius:10px;
-  overflow:auto;
-}
-
-#preview {
-  padding:10px;
-  border-radius:10px;
-  background:#fafafa;
-  min-height:100px;
-  border:1px solid #ddd;
-}
-
-#msg {
-  font-weight:bold;
+  border-radius:8px;
   margin-top:10px;
 }
 </style>
@@ -112,110 +67,109 @@ pre {
 
 <body>
 
-<div class="card">
+<div class="container">
 
-<h2 id="levelTitle"></h2>
+  <div class="panel left">
+    <h2 id="levelTitle"></h2>
 
-<select onchange="setRole(this.value)">
-  <option value="student">Дитина</option>
-  <option value="admin">Адмін</option>
-</select>
+    <p><b>📌 Завдання:</b> <span id="instruction"></span></p>
 
-<p><b>📌 Завдання:</b> <span id="instruction"></span></p>
+    <button onclick="toggleHint()">💡 Підказка</button>
 
-<button onclick="toggleHint()">💡 Показати підказку</button>
+    <div id="hintBox">
+      <p id="hint"></p>
+    </div>
 
-<div id="hintBox">
-<p><b>💡 Підказка:</b> <span id="hint"></span></p>
-</div>
+    <p><b>🧪 Приклад:</b> <code id="example"></code></p>
 
-<p><b>🧪 Приклад:</b> <code id="example"></code></p>
+    <textarea id="code"></textarea>
 
-<textarea id="code"></textarea>
+    <button onclick="check()">Перевірити</button>
 
-<br>
-<button onclick="check()">Перевірити</button>
-<button onclick="showAchievements()">🏆 Досягнення</button>
+    <p id="msg"></p>
+  </div>
 
-<p id="msg"></p>
+  <div class="panel right">
+    <h3>👀 Результат</h3>
+    <div id="preview"></div>
 
-<div id="editorLayout">
-<div>
-<h3>🧾 Код</h3>
-<pre id="codeView"></pre>
-</div>
-
-<div>
-<h3>👀 Результат</h3>
-<div id="preview"></div>
-</div>
-</div>
+    <h3>🧾 Код</h3>
+    <pre id="codeView"></pre>
+  </div>
 
 </div>
 
-<!-- SOUNDS -->
 <audio id="successSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
 <audio id="failSound" src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg"></audio>
 
 <script>
 
+// ===== PARSER =====
+function parseHTML(code){
+  let parser = new DOMParser();
+  let doc = parser.parseFromString(code, "text/html");
+  return doc.body;
+}
+
 // ===== TASKS =====
 const tasks = [
-{t:"🐾 Заголовок",instruction:"Створи заголовок",hint:"<h1>",example:"<h1>Кіт</h1>",v:(c)=>/<h1>[\s\S]*<\/h1>/.test(c)},
-{t:"🐾 Абзац",instruction:"Додай текст",hint:"<p>",example:"<p>Текст</p>",v:(c)=>c.includes("<p>")},
-{t:"🐾 Жирний",instruction:"Жирний текст",hint:"<b>",example:"<b>Текст</b>",v:(c)=>c.includes("<b>")},
-{t:"🐾 Курсив",instruction:"Курсив",hint:"<i>",example:"<i>Текст</i>",v:(c)=>c.includes("<i>")},
-{t:"🐾 Посилання",instruction:"Посилання",hint:"<a>",example:'<a href="#">Link</a>',v:(c)=>c.includes("<a")},
-{t:"🐾 Зображення",instruction:"Фото",hint:"<img>",example:'<img src="cat.jpg">',v:(c)=>c.includes("<img")},
-{t:"🐾 Список",instruction:"Список",hint:"<ul>",example:"<ul><li></li></ul>",v:(c)=>c.includes("<ul")},
-{t:"🐾 Нумерований список",instruction:"Нумерований",hint:"<ol>",example:"<ol><li></li></ol>",v:(c)=>c.includes("<ol")},
-{t:"🐾 Контейнер",instruction:"Блок",hint:"<div>",example:"<div></div>",v:(c)=>c.includes("<div")},
-{t:"🐾 Кнопка",instruction:"Кнопка",hint:"<button>",example:"<button>OK</button>",v:(c)=>c.includes("<button")},
-{t:"🐾 Форма",instruction:"Форма",hint:"<form>",example:"<form></form>",v:(c)=>c.includes("<form")}
-];
-
-// ===== USER =====
-let user = JSON.parse(localStorage.getItem("user")) || {
- xp:0,
- level:1,
- currentLevel:0,
- role:"student"
-};
-
-let achievements = JSON.parse(localStorage.getItem("achievements")) || [];
-
-function saveUser(){
- localStorage.setItem("user", JSON.stringify(user));
- localStorage.setItem("achievements", JSON.stringify(achievements));
-}
-
-// ===== ROLE =====
-function setRole(r){
- user.role = r;
- saveUser();
-}
-
-// ===== ACHIEVEMENTS =====
-function unlock(name){
- if(!achievements.includes(name)){
-  achievements.push(name);
-  saveUser();
-  alert("🏆 " + name);
+{t:"🐾 Заголовок",instruction:"Створи заголовок",hint:"<h1>Текст</h1>",example:"<h1>Кіт</h1>",check:(doc)=>{
+ let el = doc.querySelector("h1");
+ return {
+  ok: el && el.textContent.trim().length > 0,
+  errors: [
+   !el ? "❌ Немає <h1>" : null,
+   el && el.textContent.trim()=="" ? "❌ Порожній заголовок" : null
+  ].filter(Boolean)
  }
-}
-
-function showAchievements(){
- alert("🏆:\n" + achievements.join("\n"));
-}
+}},
+{t:"🐾 Абзац",instruction:"Додай абзац",hint:"<p>",example:"<p>Текст</p>",check:(doc)=>{
+ let el = doc.querySelector("p");
+ return {ok: el && el.textContent.trim(), errors: !el?["❌ Немає <p>"]:[]}
+}},
+{t:"🐾 Жирний",instruction:"Жирний текст",hint:"<b>",example:"<b>Текст</b>",check:(doc)=>{
+ let el = doc.querySelector("b");
+ return {ok: el, errors: !el?["❌ Немає <b>"]:[]}
+}},
+{t:"🐾 Курсив",instruction:"Курсив",hint:"<i>",example:"<i>Текст</i>",check:(doc)=>{
+ let el = doc.querySelector("i");
+ return {ok: el, errors: !el?["❌ Немає <i>"]:[]}
+}},
+{t:"🐾 Посилання",instruction:"Посилання",hint:"<a href>",example:'<a href="#">Link</a>',check:(doc)=>{
+ let el = doc.querySelector("a");
+ return {ok: el && el.hasAttribute("href"), errors: !el?["❌ Немає <a>"]:[]}
+}},
+{t:"🐾 Зображення",instruction:"Фото",hint:"<img>",example:'<img src="cat.jpg">',check:(doc)=>{
+ let el = doc.querySelector("img");
+ return {ok: el, errors: !el?["❌ Немає <img>"]:[]}
+}},
+{t:"🐾 Список",instruction:"Список",hint:"<ul><li>",example:"<ul><li></li></ul>",check:(doc)=>{
+ let el = doc.querySelector("ul");
+ return {ok: el && el.querySelector("li"), errors: !el?["❌ Немає <ul>"]:[]}
+}},
+{t:"🐾 Нумерований список",instruction:"<ol>",hint:"",example:"<ol><li></li></ol>",check:(doc)=>{
+ let el = doc.querySelector("ol");
+ return {ok: el && el.querySelector("li"), errors: !el?["❌ Немає <ol>"]:[]}
+}},
+{t:"🐾 Контейнер",instruction:"<div>",hint:"",example:"<div></div>",check:(doc)=>{
+ let el = doc.querySelector("div");
+ return {ok: el, errors: !el?["❌ Немає <div>"]:[]}
+}},
+{t:"🐾 Кнопка",instruction:"<button>",hint:"",example:"<button>OK</button>",check:(doc)=>{
+ let el = doc.querySelector("button");
+ return {ok: el && el.textContent.trim(), errors: !el?["❌ Немає <button>"]:[]}
+}},
+{t:"🐾 Форма",instruction:"<form>",hint:"",example:"<form></form>",check:(doc)=>{
+ let el = doc.querySelector("form");
+ return {ok: el, errors: !el?["❌ Немає <form>"]:[]}
+}}
+];
 
 // ===== LEVEL =====
 let currentLevel = 0;
 
 function loadLevel(i){
  currentLevel = i;
- user.currentLevel = i;
- saveUser();
-
  let task = tasks[i];
 
  document.getElementById("levelTitle").innerText = task.t;
@@ -239,32 +193,23 @@ function updatePreview(){
 // ===== CHECK =====
 function check(){
  let code = document.getElementById("code").value;
+ let doc = parseHTML(code);
  let task = tasks[currentLevel];
 
- if(task.v(code)){
+ let result = task.check(doc);
+
+ if(result.ok){
   document.getElementById("msg").innerText = "✅ Правильно!";
   document.getElementById("successSound").play();
 
-  user.xp += 20;
-
-  if(user.xp >= 100){
-   user.level++;
-   user.xp = 0;
-   unlock("Новий рівень");
-  }
-
-  saveUser();
-
   localStorage.setItem("code_"+currentLevel, code);
-
-  unlock("Рівень " + (currentLevel+1));
 
   if(currentLevel < tasks.length - 1){
    loadLevel(currentLevel + 1);
   }
 
  } else {
-  document.getElementById("msg").innerText = "❌ Спробуй ще";
+  document.getElementById("msg").innerText = result.errors.join(" | ");
   document.getElementById("failSound").play();
  }
 }
@@ -279,7 +224,7 @@ function toggleHint(){
 document.getElementById("code").addEventListener("input", updatePreview);
 
 // ===== INIT =====
-loadLevel(user.currentLevel || 0);
+loadLevel(0);
 
 </script>
 
