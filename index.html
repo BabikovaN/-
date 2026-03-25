@@ -218,47 +218,124 @@ function parseHTML(code){
 
 // ===== TASKS =====
 const tasks = [
-{t:"🐾 Заголовок",instruction:"Створи <h1>",hint:"<h1>Кіт</h1>",example:"<h1>Кіт</h1>",check:(doc)=>{
- let el = doc.querySelector("h1");
- return {ok: el && el.textContent.trim(), errors: !el?["❌ Немає <h1>"]:[]}
-}},
-{t:"🐾 Абзац",instruction:"Створи <p>",hint:"<p>",example:"<p>Текст</p>",check:(doc)=>{
- let el = doc.querySelector("p");
- return {ok: el, errors: !el?["❌ Немає <p>"]:[]}
-}},
-{t:"🐾 Жирний",instruction:"<b>",hint:"",example:"<b>Текст</b>",check:(doc)=>{
- return {ok: doc.querySelector("b"), errors: doc.querySelector("b")?[]:["❌ Немає <b>"]}
-}},
-{t:"🐾 Курсив",instruction:"<i>",hint:"",example:"<i>Текст</i>",check:(doc)=>{
- return {ok: doc.querySelector("i"), errors: doc.querySelector("i")?[]:["❌ Немає <i>"]}
-}},
-{t:"🐾 Посилання",instruction:"<a>",hint:"",example:'<a href="#">Link</a>',check:(doc)=>{
- let el = doc.querySelector("a");
- return {ok: el && el.hasAttribute("href"), errors: !el?["❌ Немає <a>"]:[]}
-}},
-{t:"🐾 Зображення",instruction:"<img>",hint:"",example:'<img src="cat.jpg">',check:(doc)=>{
- return {ok: doc.querySelector("img"), errors: doc.querySelector("img")?[]:["❌ Немає <img>"]}
-}},
-{t:"🐾 Список",instruction:"<ul>",hint:"",example:"<ul><li></li></ul>",check:(doc)=>{
- let el = doc.querySelector("ul");
- return {ok: el && el.querySelector("li"), errors: !el?["❌ Немає <ul>"]:[]}
-}},
-{t:"🐾 OL список",instruction:"<ol>",hint:"",example:"<ol><li></li></ol>",check:(doc)=>{
- let el = doc.querySelector("ol");
- return {ok: el && el.querySelector("li"), errors: !el?["❌ Немає <ol>"]:[]}
-}},
-{t:"🐾 DIV",instruction:"<div>",hint:"",example:"<div></div>",check:(doc)=>{
- return {ok: doc.querySelector("div"), errors: doc.querySelector("div")?[]:["❌ Немає <div>"]}
-}},
-{t:"🐾 Button",instruction:"<button>",hint:"",example:"<button>OK</button>",check:(doc)=>{
- let el = doc.querySelector("button");
- return {ok: el && el.textContent.trim(), errors: !el?["❌ Немає <button>"]:[]}
-}},
-{t:"🐾 Form",instruction:"<form>",hint:"",example:"<form></form>",check:(doc)=>{
- return {ok: doc.querySelector("form"), errors: doc.querySelector("form")?[]:["❌ Немає <form>"]}
-}}
-];
 
+{
+ t:"🐱 Рівень 1",
+ instruction:"Зроби великий заголовок 🐾",
+ hint:"Використай <h1>",
+ example:"<h1>Кіт</h1>",
+ check:(doc)=>{
+  let el = doc.querySelector("h1");
+  return {ok: el && el.textContent.trim().length>0, errors: !el?["❌ Додай заголовок <h1>"]:[]}
+ }
+},
+
+{
+ t:"🐶 Рівень 2",
+ instruction:"Напиши текст про тваринку 🐾",
+ hint:"Використай <p>",
+ example:"<p>Я люблю котів</p>",
+ check:(doc)=>{
+  let el = doc.querySelector("p");
+  return {ok: el && el.textContent.trim().length>0, errors: !el?["❌ Додай абзац <p>"]:[]}
+ }
+},
+
+{
+ t:"🐱 Рівень 3",
+ instruction:"Зроби жирний текст 🐾",
+ hint:"Використай <b>",
+ example:"<b>Кіт</b>",
+ check:(doc)=>{
+  return {ok: doc.querySelector("b"), errors: doc.querySelector("b")?[]:["❌ Додай <b>"]}
+ }
+},
+
+{
+ t:"🐶 Рівень 4",
+ instruction:"Зроби курсив 🐾",
+ hint:"Використай <i>",
+ example:"<i>Кіт</i>",
+ check:(doc)=>{
+  return {ok: doc.querySelector("i"), errors: doc.querySelector("i")?[]:["❌ Додай <i>"]}
+ }
+},
+
+{
+ t:"🐱 Рівень 5",
+ instruction:"Додай посилання 🔗",
+ hint:"Використай <a href>",
+ example:'<a href="#">Тут</a>',
+ check:(doc)=>{
+  let el = doc.querySelector("a");
+  return {ok: el && el.hasAttribute("href"), errors: !el?["❌ Додай <a>"]:[]}
+ }
+},
+
+{
+ t:"🐶 Рівень 6",
+ instruction:"Додай картинку 🖼️",
+ hint:"Використай <img>",
+ example:'<img src="cat.jpg">',
+ check:(doc)=>{
+  return {ok: doc.querySelector("img"), errors: doc.querySelector("img")?[]:["❌ Додай <img>"]}
+ }
+},
+
+{
+ t:"🐱 Рівень 7",
+ instruction:"Зроби список 📝",
+ hint:"<ul> + <li>",
+ example:"<ul><li>Кіт</li></ul>",
+ check:(doc)=>{
+  let el = doc.querySelector("ul");
+  return {ok: el && el.querySelector("li"), errors: !el?["❌ Додай список <ul>"]:[]}
+ }
+},
+
+{
+ t:"🐶 Рівень 8",
+ instruction:"Зроби нумерований список 🔢",
+ hint:"<ol>",
+ example:"<ol><li>Кіт</li></ol>",
+ check:(doc)=>{
+  let el = doc.querySelector("ol");
+  return {ok: el && el.querySelector("li"), errors: !el?["❌ Додай <ol>"]:[]}
+ }
+},
+
+{
+ t:"🐱 Рівень 9",
+ instruction:"Створи блок 🧱",
+ hint:"<div>",
+ example:"<div>Кіт</div>",
+ check:(doc)=>{
+  return {ok: doc.querySelector("div"), errors: doc.querySelector("div")?[]:["❌ Додай <div>"]}
+ }
+},
+
+{
+ t:"🐶 Рівень 10",
+ instruction:"Додай кнопку 🔘",
+ hint:"<button>",
+ example:"<button>OK</button>",
+ check:(doc)=>{
+  let el = doc.querySelector("button");
+  return {ok: el && el.textContent.trim(), errors: !el?["❌ Додай <button>"]:[]}
+ }
+},
+
+{
+ t:"🐱 Рівень 11",
+ instruction:"Створи форму 📝",
+ hint:"<form>",
+ example:"<form></form>",
+ check:(doc)=>{
+  return {ok: doc.querySelector("form"), errors: doc.querySelector("form")?[]:["❌ Додай <form>"]}
+ }
+}
+
+];
 // ===== UI =====
 function updateUI(){
  document.getElementById("xp").innerText = user.xp;
