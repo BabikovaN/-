@@ -134,21 +134,27 @@ button{
 let level = 0;
 
 const tasks = [
-{
-  text: "Зроби заголовок",
-  example: "<h1>Мій кіт</h1>",
-  validate: (code) => code.includes("<h1>") && code.includes("</h1>")
-},
-{
-  text: "Зроби абзац",
-  example: "<p>Привіт</p>",
-  validate: (code) => code.includes("<p>") && code.includes("</p>")
-},
-{
-  text: "Додай картинку",
-  example: '<img src="https://placekitten.com/200/200">',
-  validate: (code) => code.includes("<img") && code.includes("src=")
-}
+{ text: "Зроби заголовок", example: "<h1>Текст</h1>", validate:(c)=> c.includes("<h1>") && c.includes("</h1>") },
+
+{ text: "Зроби абзац", example: "<p>Привіт</p>", validate:(c)=> c.includes("<p>") && c.includes("</p>") },
+
+{ text: "Жирний текст", example: "<b>Жирний</b>", validate:(c)=> c.includes("<b>") && c.includes("</b>") },
+
+{ text: "Курсив", example: "<i>Курсив</i>", validate:(c)=> c.includes("<i>") && c.includes("</i>") },
+
+{ text: "Посилання", example: '<a href="#">Сайт</a>', validate:(c)=> c.includes("<a") && c.includes("</a>") && c.includes("href") },
+
+{ text: "Зображення", example: '<img src="https://placekitten.com/200/200">', validate:(c)=> c.includes("<img") && c.includes("src=") },
+
+{ text: "Список", example: "<ul><li>1</li></ul>", validate:(c)=> c.includes("<ul>") && c.includes("<li>") },
+
+{ text: "Таблиця", example: "<table><tr><td>1</td></tr></table>", validate:(c)=> c.includes("<table>") && c.includes("<td>") },
+
+{ text: "Кнопка", example: "<button>Натисни</button>", validate:(c)=> c.includes("<button>") && c.includes("</button>") },
+
+{ text: "Div блок", example: "<div>Блок</div>", validate:(c)=> c.includes("<div>") && c.includes("</div>") },
+
+{ text: "Форма", example: "<form><input></form>", validate:(c)=> c.includes("<form>") && c.includes("<input>") }
 ];
 
 function loadTask(){
@@ -243,6 +249,6 @@ function escapeHtml(text){
 loadTask();
 
 </script>
-
+  
 </body>
 </html>
