@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Навчальна HTML гра</title>
+<title>HTML Гра</title>
 
 <style>
 body{
@@ -58,34 +58,74 @@ button{
   border-radius:10px;
   font-family: monospace;
   text-align:left;
-  overflow-x:auto;
 }
 
-.task-title{
-  font-size:20px;
-  font-weight:bold;
+/* рамки */
+.preview-box{
+  margin-top:10px;
+  padding:15px;
+  border-radius:10px;
+  border:2px solid #ccc;
 }
 
+.correct{
+  border:3px solid green;
+}
+
+.wrong{
+  border:3px solid red;
+}
+
+/* прогрес бар */
+.progress-bar{
+  width:100%;
+  background:#ddd;
+  border-radius:10px;
+  margin:10px 0;
+}
+
+.progress{
+  height:15px;
+  width:0%;
+  background:#4da3ff;
+  border-radius:10px;
+}
+
+.compare{
+  margin-top:10px;
+  text-align:left;
+  font-family: monospace;
+  background:#f1f2f6;
+  padding:10px;
+  border-radius:10px;
+}
 </style>
 </head>
 
 <body>
 
-<h1>🎮 Навчайся HTML</h1>
+<h1>🎮 HTML Гра</h1>
 
 <div class="container">
   <div class="card">
-    
+
+    <div class="progress-bar">
+      <div id="progress" class="progress"></div>
+    </div>
+
     <div id="task"></div>
 
-    <textarea id="code" placeholder="Впиши свій код тут..."></textarea>
+    <textarea id="code" placeholder="Впиши код..."></textarea>
 
     <br>
     <button onclick="check()">Перевірити</button>
 
     <p id="msg"></p>
 
-    <div id="preview"></div>
+    <div id="preview" class="preview-box"></div>
+
+    <div id="compare"></div>
+
   </div>
 </div>
 
@@ -95,93 +135,80 @@ let level = 0;
 
 const tasks = [
 {
-  text: "Створи заголовок",
+  text: "Зроби заголовок",
   example: "<h1>Мій кіт</h1>",
-  validate: (code) => {
-    if(!code.includes("<h1>")) return "❌ Немає <h1>";
-    if(!code.includes("</h1>")) return "❌ Немає </h1>";
-    return "ok";
-  }
+  validate: (code) => code.includes("<h1>") && code.includes("</h1>")
 },
 {
-  text: "Створи абзац",
+  text: "Зроби абзац",
   example: "<p>Привіт</p>",
-  validate: (code) => {
-    if(!code.includes("<p>")) return "❌ Немає <p>";
-    if(!code.includes("</p>")) return "❌ Немає </p>";
-    return "ok";
-  }
+  validate: (code) => code.includes("<p>") && code.includes("</p>")
 },
 {
   text: "Додай картинку",
   example: '<img src="https://placekitten.com/200/200">',
-  validate: (code) => {
-    if(!code.includes("<img")) return "❌ Немає <img>";
-    if(!code.includes("src=")) return "❌ Немає src";
-    return "ok";
-  }
+  validate: (code) => code.includes("<img") && code.includes("src=")
 }
 ];
 
 function loadTask(){
+
   if(level >= tasks.length){
     document.getElementById("task").innerHTML = "🎉 Всі рівні пройдено!";
-    localStorage.removeItem("savedCode");
     return;
   }
 
   let t = tasks[level];
 
   document.getElementById("task").innerHTML = `
-    <div class="task-title">${t.text}</div>
-
-    <p>📌 Приклад правильного коду:</p>
-    <div class="example">
-<pre>${escapeHtml(t.example)}</pre>
-    </div>
+    <h2>${t.text}</h2>
+    <p>Приклад:</p>
+    <div class="example"><pre>${escapeHtml(t.example)}</pre></div>
   `;
 
-  // 🔥 відновлення збереженого коду
-  let saved = localStorage.getItem("savedCode");
+  let saved = localStorage.getItem("level_" + level);
   document.getElementById("code").value = saved ? saved : "";
 
-  document.getElementById("msg").innerHTML = "";
-  document.getElementById("preview").innerHTML = "";
+  updateProgress();
 }
 
-// 🔥 збереження при вводі
 document.getElementById("code").addEventListener("input", function(){
-  localStorage.setItem("savedCode", this.value);
+  localStorage.setItem("level_" + level, this.value);
 });
 
 function check(){
   let code = document.getElementById("code").value.trim();
   let t = tasks[level];
 
+  let preview = document.getElementById("preview");
+  let msg = document.getElementById("msg");
+  let compare = document.getElementById("compare");
+
+  preview.classList.remove("correct","wrong");
+
   if(!code){
     showError("❌ Введи код");
+    preview.classList.add("wrong");
     return;
   }
 
-  if(!isValidHTML(code)){
-    showError("❌ Помилка в тегах (перевір закриття)");
-    return;
-  }
-
-  let result = t.validate(code);
-
-  if(result !== "ok"){
-    showError(result);
+  if(!t.validate(code)){
+    showError("❌ Невірно");
+    preview.classList.add("wrong");
+    showCompare(code, t.example);
     return;
   }
 
   showSuccess("✅ Правильно!");
-  document.getElementById("preview").innerHTML = code;
+  preview.classList.add("correct");
+  preview.innerHTML = code;
+
+  compare.innerHTML = "";
+
+  localStorage.setItem("completed_" + level, "true");
 
   level++;
-  localStorage.removeItem("savedCode");
-
-  setTimeout(loadTask, 1500);
+  setTimeout(loadTask, 1200);
 }
 
 function showError(msg){
@@ -192,29 +219,20 @@ function showSuccess(msg){
   document.getElementById("msg").innerHTML = `<span class="success">${msg}</span>`;
 }
 
-// перевірка HTML
-function isValidHTML(code){
-  let stack = [];
-  let tags = code.match(/<\/??[^>]+>/g);
-
-  if(!tags) return true;
-
-  for(let tag of tags){
-    if(tag.startsWith("</")){
-      let name = tag.replace("</","").replace(">","");
-      if(stack.length === 0 || stack.pop() !== name){
-        return false;
-      }
-    } else if(!tag.endsWith("/>") && !tag.includes("img")){
-      let name = tag.replace("<","").replace(">","");
-      stack.push(name);
-    }
-  }
-
-  return stack.length === 0;
+function showCompare(userCode, correctCode){
+  document.getElementById("compare").innerHTML = `
+    <div class="compare">
+      <b>❌ Твій код:</b><br>${escapeHtml(userCode)}<br><br>
+      <b>✅ Правильний приклад:</b><br>${escapeHtml(correctCode)}
+    </div>
+  `;
 }
 
-// escape HTML для прикладу
+function updateProgress(){
+  let percent = (level / tasks.length) * 100;
+  document.getElementById("progress").style.width = percent + "%";
+}
+
 function escapeHtml(text){
   return text
     .replaceAll("&","&amp;")
