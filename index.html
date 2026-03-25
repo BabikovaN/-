@@ -367,38 +367,57 @@ function loadLevel(i){
 function updatePreview(){
  let code = document.getElementById("code").value;
  document.getElementById("codeView").innerText = code;
- document.getElementById("preview").innerHTML = code;
+
 }
 
 // ===== CHECK =====
 function check(){
- let code = document.getElementById("code").value;
- let doc = parseHTML(code);
- let task = tasks[user.currentLevel];
+  let code = document.getElementById("code").value;
+  let doc = parseHTML(code);
+  let task = tasks[user.currentLevel];
 
- let result = task.check(doc);
+  let result = task.check(doc);
 
- if(result.ok){
-  document.getElementById("msg").innerText = "✅ Правильно!";
-  document.getElementById("msg").classList.add("success");
-  document.getElementById("successSound").play();
+  if(result.ok){
+    document.getElementById("msg").innerText = "✅ Правильно!";
+    document.getElementById("msg").classList.add("success");
+    document.getElementById("successSound").play();
 
-  user.xp += 20;
-  user.streak += 1;
+    user.xp += 20;
+    user.streak += 1;
 
-  localStorage.setItem("code_"+user.currentLevel, code);
+    // збереження коду рівня
+    localStorage.setItem("code_"+user.currentLevel, code);
 
-  if(user.currentLevel < tasks.length-1){
-   loadLevel(user.currentLevel+1);
+    // 👉 ДОБАВЛЕННЯ РЕЗУЛЬТАТУ (НЕ ЗАМІНА)
+    const preview = document.getElementById("preview");
+    const codeView = document.getElementById("codeView");
+
+    preview.innerHTML += `
+      <div class="level-result">
+        <h4>Рівень ${user.currentLevel + 1}</h4>
+        ${code}
+      </div>
+    `;
+
+    codeView.textContent += `
+\n--- Рівень ${user.currentLevel + 1} ---\n
+${code}
+    `;
+
+    // перехід на наступний рівень
+    if(user.currentLevel < tasks.length - 1){
+      loadLevel(user.currentLevel + 1);
+    }
+
+  } else {
+    document.getElementById("msg").innerText = result.errors.join(" | ");
+    document.getElementById("failSound").play();
   }
 
- } else {
-  document.getElementById("msg").innerText = result.errors.join(" | ");
-  document.getElementById("failSound").play();
- }
-
- localStorage.setItem("user", JSON.stringify(user));
- updateUI();
+  // збереження користувача
+  localStorage.setItem("user", JSON.stringify(user));
+  updateUI();
 }
 
 // ===== HINT =====
