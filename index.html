@@ -189,92 +189,93 @@ function safeText(v){
   return v && v.trim() !== "" ? v : "—";
 }
 
+
 const tasks = [
 {
-t:"Заголовок",
-instruction:"Напиши HTML заголовок сторінки",
-hint:"Використай тег h1",
-exp:"<h1> створює головний заголовок",
-example:"<h1>Мій сайт</h1>",
+t:"Рівень 1 — Заголовок 🐾",
+instruction:"Створи заголовок сторінки про тварину (наприклад свого кота або собаку)",
+hint:"Використай тег <h1> і напиши текст всередині",
+exp:"Заголовок — це великий текст зверху сторінки",
+example:"<h1>Мій кіт</h1>",
 v:(c)=>c.includes("<h1>")
 },
 {
-t:"Абзац",
-instruction:"Створи абзац",
-hint:"Використай тег p",
-exp:"Абзац тексту",
-example:"<p>Привіт</p>",
+t:"Рівень 2 — Абзац 🐾",
+instruction:"Додай опис тварини у вигляді абзацу",
+hint:"Використай тег <p>",
+exp:"Абзац використовується для звичайного тексту",
+example:"<p>Мій кіт дуже грайливий</p>",
 v:(c)=>c.includes("<p>")
 },
 {
-t:"Жирний текст",
-instruction:"Зроби текст жирним",
-hint:"Використай тег b",
-exp:"Bold текст",
-example:"<b>Текст</b>",
+t:"Рівень 3 — Жирний текст 🐾",
+instruction:"Зроби частину тексту жирною",
+hint:"Використай тег <b>",
+exp:"Жирний текст виділяє важливе",
+example:"<b>Мій кіт</b>",
 v:(c)=>c.includes("<b>")
 },
 {
-t:"Курсив",
-instruction:"Курсив",
-hint:"Використай тег i",
-exp:"Italic текст",
-example:"<i>Текст</i>",
+t:"Рівень 4 — Курсив 🐾",
+instruction:"Зроби текст курсивом",
+hint:"Використай тег <i>",
+exp:"Курсив робить текст нахиленим",
+example:"<i>Мій кіт</i>",
 v:(c)=>c.includes("<i>")
 },
 {
-t:"Посилання",
+t:"Рівень 5 — Посилання 🐾",
 instruction:"Створи посилання",
-hint:"Використай тег a",
-exp:"Link",
-example:'<a href="#">Сайт</a>',
+hint:"Використай тег <a>",
+exp:"Посилання веде на іншу сторінку",
+example:'<a href="#">Сторінка</a>',
 v:(c)=>c.includes("<a")
 },
 {
-t:"Зображення",
-instruction:"Додай картинку",
-hint:"Використай тег img",
-exp:"Image",
-example:'<img src="img.jpg">',
+t:"Рівень 6 — Зображення 🐾",
+instruction:"Додай фото тварини",
+hint:"Використай тег <img>",
+exp:"Зображення показує картинку",
+example:'<img src="cat.jpg">',
 v:(c)=>c.includes("<img")
 },
 {
-t:"Список",
+t:"Рівень 7 — Список 🐾",
 instruction:"Створи список",
-hint:"Використай ul",
-exp:"List",
-example:"<ul><li>1</li></ul>",
+hint:"Використай <ul> і <li>",
+exp:"Список — це перелік елементів",
+example:"<ul><li>Корм</li></ul>",
 v:(c)=>c.includes("<ul")
 },
 {
-t:"Нумерований список",
-instruction:"Нумерований список",
-hint:"Використай ol",
-exp:"Ordered list",
+t:"Рівень 8 — Нумерований список 🐾",
+instruction:"Створи нумерований список",
+hint:"Використай <ol>",
+exp:"Список з цифрами",
 example:"<ol><li>1</li></ol>",
 v:(c)=>c.includes("<ol")
 },
 {
-t:"Контейнер",
-instruction:"Блок",
-hint:"Використай div",
-exp:"Container",
-example:"<div>Текст</div>",
+t:"Рівень 9 — Контейнер 🐾",
+instruction:"Створи блок сторінки",
+hint:"Використай <div>",
+exp:"Контейнер групує елементи",
+example:"<div>Контент</div>",
 v:(c)=>c.includes("<div")
 },
 {
-t:"Кнопка",
-instruction:"Кнопка",
-hint:"Використай button",
-exp:"Button",
-example:"<button>OK</button>",
+t:"Рівень 10 — Кнопка 🐾",
+instruction:"Додай кнопку",
+hint:"Використай <button>",
+exp:"Кнопка виконує дію",
+example:"<button>Натисни</button>",
 v:(c)=>c.includes("<button")
 },
 {
-t:"Форма",
-instruction:"Форма",
-hint:"Використай form",
-exp:"Form",
+t:"Рівень 11 — Форма 🐾",
+instruction:"Створи форму",
+hint:"Використай <form>",
+exp:"Форма для введення даних",
 example:"<form></form>",
 v:(c)=>c.includes("<form")
 }
