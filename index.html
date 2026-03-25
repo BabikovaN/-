@@ -2,227 +2,236 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Малий веб-розробник</title>
 
 <style>
-body { font-family: sans-serif; text-align: center; margin: 20px; }
-#gameArea { margin-top: 20px; }
-#output { margin-top: 20px; border: 1px solid #ccc; padding: 10px; min-height: 150px; }
-input, textarea { font-size: 16px; padding: 5px; margin: 5px; }
-img { max-width: 200px; margin: 10px; }
-#movingBox { width:50px; height:50px; background:red; position:relative; margin:10px auto;}
-.hint { background:#fff3cd; padding:10px; margin:10px; border-radius:10px; }
-.example { background:#e7f3ff; padding:10px; margin:10px; border-radius:10px; font-family: monospace;}
+* { box-sizing: border-box; }
+
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  margin: 0;
+  background: linear-gradient(135deg, #74b9ff, #a29bfe);
+}
+
+.container {
+  max-width: 600px;
+  margin: auto;
+  padding: 15px;
+}
+
+h1 { color: white; }
+
+.card {
+  background: white;
+  border-radius: 20px;
+  padding: 15px;
+  margin-top: 15px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+button {
+  padding: 15px;
+  margin: 8px;
+  font-size: 18px;
+  border: none;
+  border-radius: 12px;
+  background: #4da3ff;
+  color: white;
+  width: 90%;
+  max-width: 300px;
+}
+
+button:active { transform: scale(0.95); }
+
+input, textarea {
+  width: 90%;
+  max-width: 300px;
+  padding: 10px;
+  margin: 8px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+
+.hint {
+  background: #ffeaa7;
+  padding: 10px;
+  border-radius: 12px;
+  margin: 10px 0;
+}
+
+.example {
+  background: #dfe6e9;
+  padding: 10px;
+  border-radius: 10px;
+  font-family: monospace;
+  margin: 10px 0;
+}
+
+#movingBox {
+  width:50px;
+  height:50px;
+  background:red;
+  position:relative;
+  margin:10px auto;
+  border-radius:10px;
+}
 </style>
 
 </head>
 <body>
 
-<h1>🎮 Гра: Малий веб-розробник</h1>
-<p>Створи свій сайт про улюблену тварину 🐱</p>
+<div class="container">
+
+<h1>🎮 Малий веб-розробник</h1>
+<p style="color:white;">Створи сайт про тваринку 🐱</p>
 
 <div id="gameArea"></div>
 <div id="output"></div>
 
 <script>
-
 let level = 1;
 let output = document.getElementById("output");
 let gameArea = document.getElementById("gameArea");
 
-function loadLevel() {
-  gameArea.innerHTML = "";
-  output.innerHTML = "";
+function loadLevel(){
+  gameArea.innerHTML="";
+  output.innerHTML="";
 
   switch(level){
 
     case 1:
-      gameArea.innerHTML = `
-        <h2>Рівень 1: Зроби кнопку червоною 🔴</h2>
-        <div class="hint">👉 Натисни правильний колір</div>
-        <button onclick="setColor('red')">🔴 Червоний</button>
-        <button onclick="setColor('blue')">🔵 Синій</button>
-        <button onclick="setColor('green')">🟢 Зелений</button>
+      gameArea.innerHTML=`
+      <div class="card">
+        <h2>Зроби кнопку червоною 🔴</h2>
+        <div class="hint">Натисни правильний колір</div>
+        <button onclick="setColor('red')">🔴</button>
+        <button onclick="setColor('blue')">🔵</button>
+        <button onclick="setColor('green')">🟢</button>
         <br><button id="gameBtn">Кнопка</button>
-      `;
-      break;
+      </div>`;
+    break;
 
     case 2:
-      gameArea.innerHTML = `
-        <h2>Рівень 2: Заголовок</h2>
-
-        <div class="hint">
-        🧠 Заголовок — це як назва книжки
-        </div>
-
-        <div class="example">
-        &lt;h1&gt;Мій кіт&lt;/h1&gt;
-        </div>
-
-        <input type="text" id="titleInput" placeholder="Наприклад: Мій кіт">
-        <br>
+      gameArea.innerHTML=`
+      <div class="card">
+        <h2>Заголовок</h2>
+        <div class="hint">Це назва сторінки</div>
+        <div class="example">&lt;h1&gt;Мій кіт&lt;/h1&gt;</div>
+        <input id="titleInput" placeholder="Мій кіт">
         <button onclick="setTitle()">Створити</button>
-      `;
-      break;
+      </div>`;
+    break;
 
     case 3:
-      gameArea.innerHTML = `
-        <h2>Рівень 3: Опис</h2>
-
-        <div class="hint">
-        🧠 Тег &lt;p&gt; — це текст (як речення)
-        </div>
-
-        <div class="example">
-        &lt;p&gt;Мій кіт любить молоко&lt;/p&gt;
-        </div>
-
-        <textarea id="textInput" placeholder="Напиши щось про кота"></textarea><br>
+      gameArea.innerHTML=`
+      <div class="card">
+        <h2>Опис</h2>
+        <div class="hint">Напиши текст</div>
+        <div class="example">&lt;p&gt;Мій кіт...&lt;/p&gt;</div>
+        <textarea id="textInput"></textarea>
         <button onclick="setParagraph()">Додати</button>
-      `;
-      break;
+      </div>`;
+    break;
 
     case 4:
-      gameArea.innerHTML = `
-        <h2>Рівень 4: Картинка</h2>
-
-        <div class="hint">
-        🧠 &lt;img&gt; показує картинку
-        </div>
-
-        <div class="example">
-        &lt;img src="https://placekitten.com/200/200"&gt;
-        </div>
-
-        <input type="text" id="imgInput" placeholder="Встав посилання">
+      gameArea.innerHTML=`
+      <div class="card">
+        <h2>Картинка</h2>
+        <div class="hint">Встав посилання</div>
+        <div class="example">&lt;img src="..."&gt;</div>
+        <input id="imgInput">
         <button onclick="setImage()">Додати</button>
-      `;
-      break;
+      </div>`;
+    break;
 
     case 5:
-      gameArea.innerHTML = `
-        <h2>Рівень 5: Список</h2>
-
-        <div class="hint">
-        🧠 Список — це перелік
-        </div>
-
-        <div class="example">
-        &lt;ul&gt;
-        &lt;li&gt;М'яч&lt;/li&gt;
-        &lt;/ul&gt;
-        </div>
-
-        <input type="text" id="listInput" placeholder="м'яч, рибка, іграшка">
+      gameArea.innerHTML=`
+      <div class="card">
+        <h2>Список</h2>
+        <div class="hint">через кому</div>
+        <input id="listInput" placeholder="м'яч, рибка">
         <button onclick="setList()">Додати</button>
-      `;
-      break;
+      </div>`;
+    break;
 
     case 6:
-      gameArea.innerHTML = `
-        <h2>Рівень 6: Зміна кольору</h2>
-
-        <div class="hint">
-        🧠 Кнопка може змінювати стиль
-        </div>
-
+      gameArea.innerHTML=`
+      <div class="card">
+        <h2>Зміна кольору</h2>
         <p id="text">Мій кіт</p>
-        <button onclick="changeTextColor()">Змінити колір</button>
-      `;
-      break;
+        <button onclick="changeTextColor()">Змінити</button>
+      </div>`;
+    break;
 
     case 7:
-      gameArea.innerHTML = `
-        <h2>Рівень 7: Зміна тексту</h2>
-
-        <div class="hint">
-        🧠 innerText змінює текст
-        </div>
-
+      gameArea.innerHTML=`
+      <div class="card">
+        <h2>Зміна тексту</h2>
         <p id="text2">Привіт</p>
         <button onclick="changeTextContent()">Натисни</button>
-      `;
-      break;
+      </div>`;
+    break;
 
     case 8:
-      gameArea.innerHTML = `
-        <h2>Рівень 8: Новий текст</h2>
-
-        <div class="hint">
-        🧠 Ми можемо створювати нові елементи
-        </div>
-
+      gameArea.innerHTML=`
+      <div class="card">
+        <h2>Новий текст</h2>
         <button onclick="addParagraph()">Додати</button>
-      `;
-      break;
+      </div>`;
+    break;
 
     case 9:
-      gameArea.innerHTML = `
-        <h2>Рівень 9: Фон</h2>
-
-        <div class="hint">
-        🧠 Натисни на картинку
-        </div>
-
+      gameArea.innerHTML=`
+      <div class="card">
+        <h2>Фон</h2>
         <img src="https://placekitten.com/200/200" onclick="changeBg()">
-      `;
-      break;
+      </div>`;
+    break;
 
     case 10:
-      gameArea.innerHTML = `
-        <h2>Рівень 10: Рух</h2>
-
-        <div class="hint">
-        🧠 Елемент може рухатись
-        </div>
-
+      gameArea.innerHTML=`
+      <div class="card">
+        <h2>Рух</h2>
         <div id="movingBox"></div>
         <button onclick="moveBox()">Рухати</button>
-      `;
-      break;
+      </div>`;
+    break;
 
     case 11:
-      gameArea.innerHTML = `
+      gameArea.innerHTML=`
+      <div class="card">
         <h2>Фінал 🎉</h2>
-
-        <div class="hint">
-        Створи свій сайт сам!
-        </div>
-
-        <textarea id="finalSite" rows="10" cols="50"
-        placeholder="<h1>Мій кіт</h1>"></textarea><br>
-
+        <textarea id="finalSite" rows="8"></textarea>
         <button onclick="showFinalSite()">Показати</button>
-      `;
-      break;
+      </div>`;
+    break;
   }
 }
 
-// логіка (та сама)
-function setColor(color){
-  let btn=document.getElementById("gameBtn");
-  btn.style.backgroundColor=color;
-  if(color==='red'){ next(); }
+function setColor(c){
+  document.getElementById("gameBtn").style.background=c;
+  if(c==="red") next();
 }
 
 function setTitle(){
-  let val=document.getElementById("titleInput").value;
-  if(val.trim()!==""){ output.innerHTML="<h1>"+val+"</h1>"; next(); }
+  let v=titleInput.value;
+  if(v) { output.innerHTML="<h1>"+v+"</h1>"; next(); }
 }
 
 function setParagraph(){
-  let val=document.getElementById("textInput").value;
-  if(val.trim()!==""){ output.innerHTML="<p>"+val+"</p>"; next(); }
+  let v=textInput.value;
+  if(v) { output.innerHTML="<p>"+v+"</p>"; next(); }
 }
 
 function setImage(){
-  let url=document.getElementById("imgInput").value;
-  if(url.trim()!==""){ output.innerHTML="<img src='"+url+"'>"; next(); }
+  let v=imgInput.value;
+  if(v) { output.innerHTML="<img src='"+v+"'>"; next(); }
 }
 
 function setList(){
-  let val=document.getElementById("listInput").value;
-  let items=val.split(",");
+  let items=listInput.value.split(",");
   let html="<ul>";
   items.forEach(i=> html+="<li>"+i+"</li>");
   html+="</ul>";
@@ -231,36 +240,35 @@ function setList(){
 }
 
 function changeTextColor(){
-  document.getElementById('text').style.color='red';
+  document.getElementById("text").style.color="red";
 }
 
 function changeTextContent(){
-  document.getElementById('text2').innerText="🎉";
+  document.getElementById("text2").innerText="🎉";
   next();
 }
 
 function addParagraph(){
-  output.innerHTML += "<p>Новий текст</p>";
+  output.innerHTML+="<p>Новий текст</p>";
   next();
 }
 
 function changeBg(){
-  document.body.style.backgroundColor='lightblue';
+  document.body.style.background="lightblue";
 }
 
 function moveBox(){
-  let box=document.getElementById("movingBox");
-  let pos=0;
+  let b=document.getElementById("movingBox");
+  let p=0;
   let i=setInterval(()=>{
-    if(pos>=200) clearInterval(i);
-    pos+=5;
-    box.style.left=pos+'px';
+    if(p>200) clearInterval(i);
+    p+=5;
+    b.style.left=p+"px";
   },50);
 }
 
 function showFinalSite(){
-  let html=document.getElementById("finalSite").value;
-  output.innerHTML=html;
+  output.innerHTML=finalSite.value;
 }
 
 function next(){
@@ -270,8 +278,8 @@ function next(){
 }
 
 loadLevel();
-
 </script>
 
+</div>
 </body>
 </html>
